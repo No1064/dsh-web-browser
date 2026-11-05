@@ -1,0 +1,827 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>dsh-web-browser · 30s promo</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1080px;height:1920px;overflow:hidden;background:#04050a}
+  body{font-family:'OPPO Sans 4.0','Hiragino Sans GB','Noto Sans SC','PingFang SC',sans-serif;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  #stage{position:relative;width:1080px;height:1920px;overflow:hidden;background:#04050a}
+  #world{position:absolute;inset:0;will-change:transform;transform-origin:540px 960px}
+
+  /* ---------- background ---------- */
+  .bg{position:absolute;inset:0;overflow:hidden}
+  .bg-base{position:absolute;inset:0;background:linear-gradient(180deg,#07070f 0%,#0a0817 42%,#05050a 100%)}
+  .blob{position:absolute;border-radius:50%;mix-blend-mode:screen;opacity:.85}
+  .b1{width:1240px;height:1240px;left:-260px;top:-330px;background:radial-gradient(circle at center,rgba(112,80,255,.46),rgba(112,80,255,.12) 46%,transparent 70%)}
+  .b2{width:1080px;height:1080px;left:320px;top:940px;background:radial-gradient(circle at center,rgba(48,118,255,.34),transparent 68%)}
+  .b3{width:960px;height:960px;left:-180px;top:1180px;background:radial-gradient(circle at center,rgba(178,118,255,.24),transparent 70%)}
+  .grid{position:absolute;inset:-100px;background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);background-size:72px 72px;mask-image:radial-gradient(ellipse at 50% 45%,rgba(0,0,0,.9) 0%,transparent 72%);-webkit-mask-image:radial-gradient(ellipse at 50% 45%,rgba(0,0,0,.9) 0%,transparent 72%);opacity:.55}
+  .grain{position:absolute;inset:-60px;opacity:.05;mix-blend-mode:overlay;background-repeat:repeat}
+  .vignette{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 44%,transparent 42%,rgba(0,0,0,.58) 100%)}
+  .sweep{position:absolute;left:-40%;top:-20%;width:70%;height:140%;background:linear-gradient(100deg,transparent 0%,rgba(190,170,255,.20) 45%,rgba(255,255,255,.28) 50%,rgba(190,170,255,.18) 55%,transparent 100%);opacity:0;transform:rotate(8deg)}
+  .flash{position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,rgba(210,198,255,.9),rgba(140,108,255,.35) 45%,transparent 75%);opacity:0;pointer-events:none;mix-blend-mode:screen}
+
+  /* ---------- scenes ---------- */
+  .scene{position:absolute;inset:0;opacity:0}
+  .title{position:absolute;left:64px;top:150px;width:952px}
+  .eyebrow{font-size:25px;font-weight:600;letter-spacing:.18em;color:rgba(255,255,255,.52);display:flex;align-items:center;gap:14px}
+  .eyebrow::before{content:'';width:36px;height:2px;border-radius:2px;background:linear-gradient(90deg,#8C6CFF,rgba(140,108,255,0))}
+  .h1{font-size:86px;font-weight:900;line-height:1.16;letter-spacing:-.012em;margin-top:16px;color:#F7F5FF}
+  .h1 .line{display:block;white-space:nowrap}
+  .h1 .accent{color:#BCA6FF;text-shadow:0 0 70px rgba(140,108,255,.5)}
+  .h1 .small{font-size:72px}
+  .h1 .white{color:#fff}
+  .sub{margin-top:16px;font-size:31px;font-weight:500;color:rgba(255,255,255,.58);letter-spacing:.02em}
+  .sub b{color:#BCA6FF;font-weight:600}
+
+  /* ---------- browser card ---------- */
+  .card{position:absolute;left:40px;top:520px;width:1000px;height:751px;border-radius:28px;overflow:hidden;background:#fff;box-shadow:0 44px 120px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.10),0 0 160px rgba(124,92,255,.25)}
+  .cam{position:absolute;left:0;top:0;width:100%;height:100%;transform-origin:0 0;will-change:transform}
+  .shot{display:block;width:100%;height:100%;object-fit:fill}
+  .dim{position:absolute;inset:0;background:rgba(6,5,14,.38);opacity:0}
+  .fx{position:absolute;inset:0;pointer-events:none}
+
+  /* shell (s2) */
+  .side{position:absolute;left:0;top:0;width:164.4px;height:100%;overflow:hidden;background:#ebedec;will-change:transform,opacity}
+  .side img{display:block;width:164.4px;height:auto}
+  .side::after{content:'';position:absolute;left:0;right:0;bottom:0;height:90px;background:linear-gradient(180deg,rgba(235,237,236,0),#ebedec 78%)}
+  .panel2{position:absolute;left:164.4px;top:0;width:835.6px;height:100%;overflow:hidden;background:#fff;will-change:transform}
+  .panel2 img{display:block;width:100%;height:100%;object-fit:fill}
+
+  /* ---------- fx ---------- */
+  .ring{position:absolute;border:2.5px solid rgba(190,166,255,.95);border-radius:15px;box-shadow:0 0 0 7px rgba(140,108,255,.13),0 0 46px rgba(140,108,255,.55);opacity:0;pointer-events:none}
+  .ring.soft{border-color:rgba(190,166,255,.7);box-shadow:0 0 0 6px rgba(140,108,255,.10),0 0 34px rgba(140,108,255,.35)}
+  .pill{position:absolute;display:inline-flex;align-items:center;gap:13px;padding:17px 27px;border-radius:999px;background:rgba(18,15,32,.86);border:1px solid rgba(255,255,255,.17);color:#fff;font-size:29px;font-weight:600;white-space:nowrap;opacity:0;box-shadow:0 18px 55px rgba(0,0,0,.55);letter-spacing:.01em;backdrop-filter:blur(12px)}
+  .pill .dot{width:10px;height:10px;border-radius:50%;background:#BCA6FF;box-shadow:0 0 18px #8C6CFF;flex:0 0 auto}
+  .pill .arrow{font-size:26px;color:rgba(255,255,255,.5)}
+  .kbd{position:absolute;left:0;top:0;display:flex;flex-direction:column;align-items:center;gap:10px;opacity:0}
+  .kbd .key{min-width:104px;height:104px;padding:0 22px;border-radius:22px;display:flex;align-items:center;justify-content:center;font-size:44px;font-weight:700;color:#E9E4FF;background:linear-gradient(180deg,rgba(60,52,96,.95),rgba(28,24,46,.95));border:1px solid rgba(255,255,255,.16);box-shadow:0 14px 34px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.14)}
+  .kbd .lbl{font-size:22px;letter-spacing:.16em;color:rgba(255,255,255,.5)}
+  .scrim-card{position:absolute;left:0;right:0;bottom:0;height:520px;background:linear-gradient(180deg,rgba(8,8,16,0) 0%,rgba(8,8,16,.60) 42%,rgba(8,8,16,.88) 100%);opacity:0;pointer-events:none}
+  .arrowline{position:absolute;height:2px;background:linear-gradient(90deg,rgba(188,166,255,.95),rgba(188,166,255,0));opacity:0}
+  .arrowline::before{content:'';position:absolute;left:-1px;top:-6px;border-right:13px solid #BCA6FF;border-top:7px solid transparent;border-bottom:7px solid transparent}
+  .pin{position:absolute;left:0;top:0;width:190px;height:190px;border-radius:46px;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,#8E6DFF,#5638D8);box-shadow:0 30px 90px rgba(95,60,255,.55),inset 0 1px 0 rgba(255,255,255,.32);opacity:0;will-change:transform,opacity}
+  .pin svg{width:96px;height:96px;fill:none;stroke:#fff;stroke-width:1.7;stroke-linejoin:round;transition:fill .2s,stroke .2s}
+  .pin.on svg{fill:#FFD479;stroke:#FFD479}
+  .cursor{position:absolute;left:0;top:0;width:44px;height:44px;opacity:0;filter:drop-shadow(0 4px 10px rgba(0,0,0,.55))}
+  .badge{display:inline-flex;align-items:center;gap:12px;padding:13px 26px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);font-size:26px;color:rgba(255,255,255,.82);letter-spacing:.1em}
+  .badge i{width:9px;height:9px;border-radius:50%;background:#7CE3B0;box-shadow:0 0 14px #5BD79C;display:inline-block}
+
+  /* s1 hook */
+  .ghosts{position:absolute;inset:0;overflow:hidden}
+  .ghost{position:absolute;left:50%;top:50%;width:820px;height:615px;margin:-307px 0 0 -410px;border-radius:18px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.12);opacity:.5}
+  .ghost img{display:block;width:100%;height:100%;object-fit:cover}
+  .scrim-s1{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 52%,rgba(4,4,10,.86) 0%,rgba(4,4,10,.72) 38%,rgba(4,4,10,.42) 70%,transparent 100%)}
+  .hookwrap{position:absolute;left:0;right:0;top:640px;text-align:center}
+  .hookwrap .eyebrow{justify-content:center}
+  .hookwrap .eyebrow::before{display:none}
+  .hook{font-size:104px;line-height:1.14;margin-top:24px}
+  .hook .line{white-space:nowrap}
+  .keys{position:absolute;left:0;top:0;width:1080px;height:1920px;pointer-events:none}
+
+  /* s6 menu */
+  .ctx{position:absolute;left:0;top:0;width:208px;padding:4px;border-radius:8px;background:#fff;border:.5px solid rgba(0,0,0,.13);box-shadow:0 10px 30px rgba(0,0,0,.22),0 2px 6px rgba(0,0,0,.08);color:#1f2329;transform-origin:0 0;opacity:0}
+  .ctx-item{height:28px;display:flex;align-items:center;padding:0 8px;border-radius:5px;white-space:nowrap;font-size:12px;color:#1f2329}
+  .ctx-sep{height:1px;margin:4px 6px;background:rgba(0,0,0,.07)}
+
+  /* s8 CTA */
+  .cta{position:absolute;left:0;right:0;text-align:center}
+  .logo{width:200px;height:200px;border-radius:46px;box-shadow:0 30px 80px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.14),0 0 120px rgba(110,86,207,.55)}
+  .wordmark{font-size:66px;font-weight:800;letter-spacing:-.02em;color:#fff;margin-top:30px}
+  .tagline{font-size:30px;font-weight:500;color:rgba(255,255,255,.58);margin-top:14px;letter-spacing:.04em}
+  .codebox{display:inline-block;text-align:left;padding:22px 30px;border-radius:18px;background:rgba(16,14,30,.82);border:1px solid rgba(255,255,255,.14);box-shadow:0 24px 60px rgba(0,0,0,.5);backdrop-filter:blur(14px)}
+  .codebox .ln{font-family:'SF Mono',Menlo,monospace;font-size:24px;color:#D9D2FF;line-height:1.5;white-space:nowrap}
+  .codebox .ln .pr{color:#6FE3B0}
+  .codebox .ln .dim2{color:rgba(255,255,255,.45)}
+  .gh{display:inline-flex;align-items:center;gap:16px;padding:20px 38px;border-radius:999px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);font-size:38px;font-weight:600;color:#fff;letter-spacing:.01em}
+  .star{width:36px;height:36px;fill:#FFD479;filter:drop-shadow(0 0 12px rgba(255,200,90,.7))}
+  .vtag{font-size:22px;letter-spacing:.2em;color:rgba(255,255,255,.38);margin-top:18px}
+
+  .gloss{position:absolute;inset:-20%;background:linear-gradient(112deg,transparent 34%,rgba(255,255,255,.32) 47%,rgba(255,255,255,.55) 50%,rgba(255,255,255,.32) 53%,transparent 66%);opacity:0;pointer-events:none;mix-blend-mode:screen}
+  .opts{position:absolute;left:50px;right:50px;top:1292px;display:flex;justify-content:center;gap:16px}
+  .opt{display:inline-flex;align-items:center;gap:10px;padding:14px 26px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);font-size:27px;font-weight:500;color:rgba(255,255,255,.86);white-space:nowrap;opacity:0}
+  .opt i{width:9px;height:9px;border-radius:50%;background:#BCA6FF;box-shadow:0 0 14px #8C6CFF;display:inline-block}
+  .opt.hot{background:#7C5CFF;border-color:#7C5CFF;color:#fff;font-weight:600;box-shadow:0 12px 36px rgba(124,92,255,.5)}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="world">
+    <div class="bg">
+      <div class="bg-base"></div>
+      <div class="blob b1" id="blob1"></div>
+      <div class="blob b2" id="blob2"></div>
+      <div class="blob b3" id="blob3"></div>
+      <div class="grid" id="grid"></div>
+      <div class="grain" id="grain"></div>
+      <div class="vignette"></div>
+      <div class="sweep" id="sweep"></div>
+    </div>
+
+    <!-- s1 hook -->
+    <section class="scene" id="s1">
+      <div class="ghosts" id="ghosts">
+        <div class="ghost" id="g0"><img src="assets/panel-02.jpg"></div>
+        <div class="ghost" id="g1"><img src="assets/panel-03.jpg"></div>
+        <div class="ghost" id="g2"><img src="assets/panel-02.jpg"></div>
+      </div>
+      <div class="scrim-s1"></div>
+      <div class="hookwrap">
+        <div class="eyebrow" id="s1eb">DSH 用户日常</div>
+        <h1 class="h1 hook" id="s1h1">
+          <span class="line" data-t="网页版 DeepSeek"></span>
+          <span class="line accent" data-t="还切浏览器？"></span>
+        </h1>
+      </div>
+      <div class="keys" id="keys">
+        <div class="kbd" id="kbd1"><div class="key">⌘</div><div class="lbl">切到浏览器</div></div>
+        <div class="kbd" id="kbd2"><div class="key">Tab</div><div class="lbl">再切回来</div></div>
+      </div>
+    </section>
+
+    <!-- s2 reveal -->
+    <section class="scene" id="s2">
+      <div class="title">
+        <div class="eyebrow" id="s2eb">只用装一个插件</div>
+        <h1 class="h1" id="s2h1">
+          <span class="line white" data-t="网页版 DeepSeek"></span>
+          <span class="line accent" data-t="直接开在 DSH 里"></span>
+        </h1>
+        <div class="sub" id="s2sub">整页面板 · 内置 Chromium 引擎</div>
+      </div>
+      <div class="card" id="card2">
+        <div class="cam" id="cam2">
+          <div class="side" id="side2"><img src="assets/sidebar.jpg" alt=""></div>
+          <div class="panel2" id="panel2"><img id="panel2img" src="assets/panel-02.jpg" alt=""></div>
+        </div>
+      </div>
+      <div class="fx" id="fx2"></div>
+      <div class="arrowline" id="arrow2"></div>
+    </section>
+
+    <!-- s3 web deepseek -->
+    <section class="scene" id="s3">
+      <div class="title">
+        <div class="eyebrow" id="s3eb">01 / 网页版直接用</div>
+        <h1 class="h1" id="s3h1">
+          <span class="line" data-t="登录就能用"></span>
+          <span class="line accent" data-t="聊天不切窗口"></span>
+        </h1>
+        <div class="sub" id="s3sub">chat.deepseek.com 在面板里跑</div>
+      </div>
+      <div class="card" id="card3">
+        <div class="cam" id="cam3"><img class="shot" src="assets/panel-02.jpg" alt=""></div>
+      </div>
+      <div class="fx" id="fx3"></div>
+    </section>
+
+    <!-- s4 tabs -->
+    <section class="scene" id="s4">
+      <div class="title">
+        <div class="eyebrow" id="s4eb">02 / 标签常驻</div>
+        <h1 class="h1" id="s4h1">
+          <span class="line" data-t="DeepSeek 常驻"></span>
+          <span class="line accent" data-t="重启也还在"></span>
+        </h1>
+        <div class="sub" id="s4sub">标签与 URL 自动恢复</div>
+      </div>
+      <div class="card" id="card4">
+        <div class="cam" id="cam4"><img class="shot" src="assets/panel-02.jpg" alt=""></div>
+      </div>
+      <div class="fx" id="fx4"></div>
+    </section>
+
+    <!-- s5 custom background reveal -->
+    <section class="scene" id="s5">
+      <div class="title">
+        <div class="eyebrow" id="s5eb">03 / 自定义标签页背景</div>
+        <h1 class="h1" id="s5h1">
+          <span class="line white" data-t="标签页背景"></span>
+          <span class="line accent" data-t="想换就换"></span>
+        </h1>
+        <div class="sub" id="s5sub">默认渐变 · 纯色 · 图片 URL · 本地图片</div>
+      </div>
+      <div class="card" id="card5">
+        <div class="cam" id="cam5"><img class="shot" src="assets/panel-03.jpg" alt=""></div>
+        <div class="gloss" id="gloss5"></div>
+      </div>
+      <div class="fx" id="fx5"></div>
+    </section>
+
+    <!-- s6 background options -->
+    <section class="scene" id="s6">
+      <div class="title">
+        <div class="eyebrow" id="s6eb">04 / 四种背景</div>
+        <h1 class="h1" id="s6h1">
+          <span class="line" data-t="渐变、纯色、图片"></span>
+          <span class="line accent" data-t="本地图都行"></span>
+        </h1>
+        <div class="sub" id="s6sub">起始页背景可自定义</div>
+      </div>
+      <div class="card" id="card6">
+        <div class="cam" id="cam6"><img class="shot" src="assets/panel-03.jpg" alt=""></div>
+      </div>
+      <div class="opts" id="opts6"></div>
+      <div class="fx" id="fx6"></div>
+    </section>
+
+    <!-- s7 menu + history -->
+    <section class="scene" id="s7">
+      <div class="title">
+        <div class="eyebrow" id="s7eb">05 / 细节齐全</div>
+        <h1 class="h1" id="s7h1">
+          <span class="line" data-t="右键、历史"></span>
+          <span class="line accent" data-t="一个都不少"></span>
+        </h1>
+        <div class="sub" id="s7sub">右键菜单 · 浏览历史 · Chrome 接力</div>
+      </div>
+      <div class="card" id="card7a">
+        <div class="cam" id="cam7a"><img class="shot" src="assets/panel-02.jpg" alt=""></div>
+        <div class="dim" id="dim7"></div>
+      </div>
+      <div class="ctx" id="ctx7">
+        <div class="ctx-item">剪切</div>
+        <div class="ctx-item">复制</div>
+        <div class="ctx-item">粘贴</div>
+        <div class="ctx-item">全选</div>
+        <div class="ctx-sep"></div>
+        <div class="ctx-item">在新标签页打开链接</div>
+        <div class="ctx-item">复制链接地址</div>
+        <div class="ctx-item">用 Chrome 打开链接</div>
+        <div class="ctx-sep"></div>
+        <div class="ctx-item">后退</div>
+        <div class="ctx-item" style="color:#c9c9c9">前进</div>
+        <div class="ctx-item">刷新</div>
+        <div class="ctx-item">复制当前网址</div>
+        <div class="ctx-item">放大</div>
+        <div class="ctx-item">缩小</div>
+        <div class="ctx-item">重置缩放</div>
+      </div>
+      <div class="cursor" id="cur7">
+        <svg viewBox="0 0 24 24" width="44" height="44"><path d="M4 2.5l14.5 8.2-6.3 1.4-2.9 6.2L4 2.5z" fill="#fff" stroke="#111" stroke-width="1.4" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="card" id="card7b">
+        <div class="cam" id="cam7b"><img class="shot" src="assets/ui-history.png" alt=""></div>
+      </div>
+      <div class="fx" id="fx7"></div>
+    </section>
+
+    <!-- s8 CTA -->
+    <section class="scene" id="s8">
+      <div class="cta" style="top:404px"><div class="badge" id="badge8"><i></i>开源免费 · 一行命令安装</div></div>
+      <div class="cta" style="top:560px">
+        <img class="logo" id="logo8" src="assets/icon.png" alt="">
+        <div class="wordmark" id="word8">dsh-web-browser</div>
+        <div class="tagline" id="tag8">DSH 整页浏览器插件 · MIT 开源</div>
+      </div>
+      <div class="cta" style="top:1020px">
+        <div class="codebox" id="code8">
+          <div class="ln"><span class="pr">$</span> dsh plugin --profile desktop add</div>
+          <div class="ln"><span class="dim2">  github:No1064/dsh-web-browser</span></div>
+        </div>
+      </div>
+      <div class="cta" style="top:1240px">
+        <div class="gh" id="gh8">
+          <svg class="star" viewBox="0 0 24 24"><path d="M12 2.6l2.9 5.9 6.5.95-4.7 4.58 1.1 6.47L12 17.45 6.2 20.5l1.1-6.47L2.6 9.45l6.5-.95L12 2.6z"/></svg>
+          <span>GitHub 搜 dsh-web-browser</span>
+        </div>
+        <div class="tagline" id="star8" style="margin-top:26px">点个 Star，收后续更新</div>
+        <div class="vtag" id="vtag8">v0.2.10 · MIT</div>
+      </div>
+    </section>
+  </div>
+  <div class="flash" id="flash"></div>
+</div>
+
+<script>
+/* ============================ utils ============================ */
+const $ = id => document.getElementById(id);
+const clamp01 = v => v < 0 ? 0 : v > 1 ? 1 : v;
+const seg = (t, a, b) => clamp01((t - a) / (b - a));
+const lerp = (a, b, p) => a + (b - a) * p;
+const E = {
+  outQuint: p => 1 - Math.pow(1 - p, 5),
+  outCubic: p => 1 - Math.pow(1 - p, 3),
+  outExpo: p => p >= 1 ? 1 : 1 - Math.pow(2, -10 * p),
+  inOutCubic: p => p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2,
+  inOutSine: p => -(Math.cos(Math.PI * p) - 1) / 2,
+  outBack: (p, s = 1.6) => 1 + (s + 1) * Math.pow(p - 1, 3) + s * Math.pow(p - 1, 2),
+};
+const TAU = Math.PI * 2;
+
+function setT(el, x, y, s, r, o, blur) {
+  let tt = '';
+  if (x !== null || y !== null) tt += `translate(${(x || 0).toFixed(2)}px,${(y || 0).toFixed(2)}px) `;
+  if (s !== null && s !== undefined) tt += `scale(${s.toFixed(4)}) `;
+  if (r) tt += `rotate(${r.toFixed(2)}deg) `;
+  if (tt) el.style.transform = tt;
+  if (o !== null && o !== undefined) el.style.opacity = o.toFixed(3);
+  if (blur !== undefined) el.style.filter = blur > .15 ? `blur(${blur.toFixed(2)}px)` : 'none';
+}
+
+/* text: split each .line into chars */
+function splitLines(root) {
+  root.querySelectorAll('.line').forEach(line => {
+    const txt = line.getAttribute('data-t') || line.textContent;
+    line.textContent = '';
+    for (const ch of txt) {
+      const s = document.createElement('span');
+      s.className = 'ch';
+      s.textContent = ch === ' ' ? '\u00A0' : ch;
+      s.style.display = 'inline-block';
+      s.style.willChange = 'transform,opacity,filter';
+      line.appendChild(s);
+    }
+  });
+}
+function charsIn(line, t, t0, stagger = .026, dur = .5, dy = 74, rot = -3) {
+  const cs = line.children;
+  for (let i = 0; i < cs.length; i++) {
+    const s = cs[i];
+    const p = clamp01((t - t0 - i * stagger) / dur);
+    const e = E.outQuint(p);
+    s.style.opacity = e.toFixed(3);
+    s.style.transform = `translateY(${((1 - e) * dy).toFixed(2)}px) rotate(${((1 - e) * rot).toFixed(2)}deg)`;
+    s.style.filter = p < .999 ? `blur(${((1 - e) * 7).toFixed(2)}px)` : 'none';
+  }
+}
+function fadeIn(el, t, t0, dur = .5, dy = 26, sc = 1) {
+  const p = clamp01((t - t0) / dur);
+  const e = E.outCubic(p);
+  el.style.opacity = e.toFixed(3);
+  el.style.transform = `translateY(${((1 - e) * dy).toFixed(2)}px) scale(${lerp(sc, 1, e).toFixed(4)})`;
+  el.style.filter = p < .999 ? `blur(${((1 - e) * 6).toFixed(2)}px)` : 'none';
+}
+
+/* rings & pills */
+function makeRing(parent, cls) {
+  const d = document.createElement('div');
+  d.className = 'ring' + (cls ? ' ' + cls : '');
+  parent.appendChild(d);
+  return d;
+}
+function makePill(parent, text, withArrow) {
+  const d = document.createElement('div');
+  d.className = 'pill';
+  d.innerHTML = `<span class="dot"></span><span>${text}</span>${withArrow ? '<span class="arrow">↗</span>' : ''}`;
+  parent.appendChild(d);
+  return d;
+}
+function placeRing(el, x, y, w, h, alpha, pulse) {
+  el.style.left = x.toFixed(1) + 'px';
+  el.style.top = y.toFixed(1) + 'px';
+  el.style.width = w.toFixed(1) + 'px';
+  el.style.height = h.toFixed(1) + 'px';
+  const s = pulse === undefined ? 1 : 1 + Math.sin(pulse) * .025;
+  el.style.transform = `scale(${s.toFixed(4)})`;
+  el.style.opacity = alpha.toFixed(3);
+}
+function placePill(el, x, y, alpha, dy = 0, sc = 1) {
+  el.style.left = x.toFixed(1) + 'px';
+  el.style.top = y.toFixed(1) + 'px';
+  el.style.transform = `translateY(${dy.toFixed(1)}px) scale(${sc.toFixed(4)})`;
+  el.style.opacity = alpha.toFixed(3);
+}
+
+/* camera */
+const CARD = { x: 40, y: 520, w: 1000, h: 751 };
+function camera(cam, imgW, imgH, k, cx, cy, ox, oy) {
+  const bw = CARD.w / imgW, bh = CARD.h / imgH;
+  const px = ox - k * cx * bw;
+  const py = oy - k * cy * bh;
+  cam.style.transform = `translate(${px.toFixed(2)}px,${py.toFixed(2)}px) scale(${k.toFixed(4)})`;
+}
+function project(ix, iy, imgW, imgH, k, cx, cy, ox, oy) {
+  const bw = CARD.w / imgW, bh = CARD.h / imgH;
+  const px = ox - k * cx * bw;
+  const py = oy - k * cy * bh;
+  return { x: CARD.x + px + k * ix * bw, y: CARD.y + py + k * iy * bh, s: k * bw };
+}
+
+/* ============================ bootstrap ============================ */
+let T, SCENES;
+const IMG = { hit: 0 };
+const need = ['panel-01.jpg', 'panel-02.jpg', 'panel-03.jpg', 'sidebar.jpg', 'icon.png'];
+function loadImg(src) {
+  return new Promise(res => {
+    const im = new Image();
+    im.onload = () => { IMG.hit++; res(); };
+    im.onerror = () => { IMG.hit++; res(); };
+    im.src = src;
+  });
+}
+
+async function boot() {
+  T = await fetch('/work/timeline.json').then(r => r.json());
+  SCENES = T.scenes;
+  await Promise.all([
+    ...need.map(n => loadImg('assets/' + n)),
+    document.fonts ? document.fonts.load('900 92px "OPPO Sans 4.0"') : Promise.resolve(),
+    document.fonts ? document.fonts.load('600 30px "OPPO Sans 4.0"') : Promise.resolve(),
+    document.fonts ? document.fonts.load('500 30px "OPPO Sans 4.0"') : Promise.resolve(),
+  ]);
+  if (document.fonts) await document.fonts.ready;
+  init();
+  window.renderAt(0);
+  window.__ready = true;
+}
+boot().catch(e => { window.__err = String(e); });
+
+/* ============================ init ============================ */
+let els = {};
+function init() {
+  document.querySelectorAll('h1').forEach(splitLines);
+
+  const c = document.createElement('canvas');
+  c.width = c.height = 140;
+  const ctx = c.getContext('2d');
+  const id = ctx.createImageData(140, 140);
+  for (let i = 0; i < id.data.length; i += 4) {
+    const v = Math.random() * 255;
+    id.data[i] = v; id.data[i + 1] = v; id.data[i + 2] = v; id.data[i + 3] = 26;
+  }
+  ctx.putImageData(id, 0, 0);
+  $('grain').style.backgroundImage = `url(${c.toDataURL()})`;
+
+  els = {
+    world: $('world'), flash: $('flash'), sweep: $('sweep'),
+    b1: $('blob1'), b2: $('blob2'), b3: $('blob3'), grain: $('grain'), grid: $('grid'),
+    scenes: SCENES.map(s => $(s.id)),
+  };
+  // s1
+  els.g0 = $('g0'); els.g1 = $('g1'); els.g2 = $('g2');
+  els.s1eb = $('s1eb'); els.s1h1 = $('s1h1'); els.kbd1 = $('kbd1'); els.kbd2 = $('kbd2');
+  // s2
+  els.card2 = $('card2'); els.cam2 = $('cam2'); els.side2 = $('side2'); els.panel2 = $('panel2');
+  els.panel2img = $('panel2img'); els.fx2 = $('fx2'); els.arrow2 = $('arrow2');
+  els.s2eb = $('s2eb'); els.s2h1 = $('s2h1'); els.s2sub = $('s2sub');
+  // s3
+  els.card3 = $('card3'); els.cam3 = $('cam3'); els.fx3 = $('fx3');
+  els.s3eb = $('s3eb'); els.s3h1 = $('s3h1'); els.s3sub = $('s3sub');
+  // s4
+  els.card4 = $('card4'); els.cam4 = $('cam4'); els.fx4 = $('fx4');
+  els.s4eb = $('s4eb'); els.s4h1 = $('s4h1'); els.s4sub = $('s4sub');
+  // s5
+  els.card5 = $('card5'); els.cam5 = $('cam5'); els.gloss5 = $('gloss5'); els.fx5 = $('fx5');
+  els.s5eb = $('s5eb'); els.s5h1 = $('s5h1'); els.s5sub = $('s5sub');
+  // s6
+  els.card6 = $('card6'); els.cam6 = $('cam6'); els.fx6 = $('fx6'); els.opts6 = $('opts6');
+  els.s6eb = $('s6eb'); els.s6h1 = $('s6h1'); els.s6sub = $('s6sub');
+  // s7
+  els.card7a = $('card7a'); els.cam7a = $('cam7a'); els.dim7 = $('dim7');
+  els.ctx7 = $('ctx7'); els.cur7 = $('cur7');
+  els.card7b = $('card7b'); els.cam7b = $('cam7b'); els.fx7 = $('fx7');
+  els.s7eb = $('s7eb'); els.s7h1 = $('s7h1'); els.s7sub = $('s7sub');
+  // s8
+  els.badge8 = $('badge8'); els.logo8 = $('logo8'); els.word8 = $('word8'); els.tag8 = $('tag8');
+  els.code8 = $('code8'); els.gh8 = $('gh8'); els.star8 = $('star8'); els.vtag8 = $('vtag8');
+
+  // s2 fx
+  els.r2 = makeRing(els.fx2);
+  els.p2 = makePill(els.fx2, '点这里：功能菜单 → 浏览器', true);
+  els.p2b = makePill(els.fx2, '整页面板，占满主内容区');
+  // s3 fx
+  els.r3 = makeRing(els.fx3);
+  els.p3a = makePill(els.fx3, '网页版 DeepSeek');
+  els.p3b = makePill(els.fx3, '不跳出 DSH');
+  // s4 fx
+  els.r4 = makeRing(els.fx4);
+  els.r4b = makeRing(els.fx4, 'soft');
+  els.p4 = makePill(els.fx4, '标签与 URL 自动恢复');
+  // s5 fx
+  els.p5 = makePill(els.fx5, '换成你喜欢的背景');
+  // s6 opts
+  els.optEls = ['默认渐变', '纯色', '图片 URL', '本地图片'].map(t => {
+    const d = document.createElement('div');
+    d.className = 'opt';
+    d.innerHTML = `<i></i><span>${t}</span>`;
+    els.opts6.appendChild(d);
+    return d;
+  });
+  // s7 fx
+  els.p7a = makePill(els.fx7, '右键菜单');
+  els.p7b = makePill(els.fx7, '浏览历史');
+  els.r7 = makeRing(els.fx7);
+  els.r7b = makeRing(els.fx7, 'soft');
+  els.ctxItems = Array.from(els.ctx7.querySelectorAll('.ctx-item'));
+  els.ctxOffsets = els.ctxItems.map(it => it.offsetTop + it.offsetHeight / 2);
+  els.ctxItems[8].dataset.disabled = '1';
+}
+
+/* ============================ render ============================ */
+function renderAt(t) {
+  const SC = SCENES;
+  for (let i = 0; i < SC.length; i++) {
+    const s = SC[i];
+    const on = t >= s.start - .001 && t < s.end - .001;
+    $('s' + (i + 1)).style.opacity = on ? 1 : 0;
+  }
+  const bl = (el, x, y, s) => { el.style.transform = `translate(${x.toFixed(1)}px,${y.toFixed(1)}px) scale(${s.toFixed(3)})`; };
+  bl(els.b1, Math.sin(t * .35) * 40, Math.cos(t * .3) * 30, 1 + Math.sin(t * .22) * .06);
+  bl(els.b2, Math.cos(t * .28) * 60, Math.sin(t * .33) * 40, 1 + Math.cos(t * .19) * .05);
+  bl(els.b3, Math.sin(t * .4 + 2) * 50, Math.cos(t * .26 + 1) * 50, 1 + Math.sin(t * .17 + 1) * .05);
+  const gi = (t * 60) | 0;
+  els.grain.style.backgroundPosition = `${(gi * 37) % 140}px ${(gi * 71) % 140}px`;
+  els.grid.style.opacity = .4 + .15 * Math.sin(t * .8);
+
+  let lastCut = -99;
+  for (const c of T.hard_cuts) if (t >= c) lastCut = c;
+  const since = t - lastCut;
+  const kicked = since >= 0 && since < .5 ? Math.exp(-since * 10) : 0;
+  els.flash.style.opacity = (kicked * .34).toFixed(3);
+  const shake = since < .35 ? Math.exp(-since * 14) : 0;
+  const shx = Math.sin(since * 170) * 9 * shake;
+  const shy = Math.cos(since * 210) * 7 * shake;
+  const punch = 1 + .012 * shake;
+  els.world.style.transform = `translate(${shx.toFixed(2)}px,${shy.toFixed(2)}px) scale(${punch.toFixed(4)})`;
+  els.sweep.style.opacity = (kicked * .3).toFixed(3);
+  els.sweep.style.transform = `translateX(${(since * 2400 - 200).toFixed(0)}px) rotate(8deg)`;
+
+  s1(SC[0], t); s2(SC[1], t); s3(SC[2], t); s4(SC[3], t);
+  s5(SC[4], t); s6(SC[5], t); s7(SC[6], t); s8(SC[7], t);
+}
+
+/* ---------------- s1 hook ---------------- */
+function s1(S, t) {
+  const lt = t - S.start;
+  if (t < S.start || t > S.end) return;
+  const ghosts = [els.g0, els.g1, els.g2];
+  const cfg = [
+    { x: -150, y: 120, r: -11, s: .97, o: .55 },
+    { x: 120, y: 60, r: 8, s: .9, o: .4 },
+    { x: -30, y: 240, r: 15, s: .84, o: .3 },
+  ];
+  ghosts.forEach((g, i) => {
+    const c = cfg[i];
+    const jump = (Math.floor((lt + i * .19) / .52) % 2) ? 1 : -1;
+    const x = c.x + Math.sin(lt * 2.1 + i * 2.2) * 30 + jump * 26;
+    const y = c.y + Math.cos(lt * 1.7 + i * 1.4) * 18;
+    const r = c.r + Math.sin(lt * 1.9 + i) * 2.4;
+    g.style.transform = `translate(calc(-50% + ${x.toFixed(1)}px), calc(-50% + ${y.toFixed(1)}px)) rotate(${r.toFixed(2)}deg) scale(${(c.s + Math.sin(lt * 2 + i) * .012).toFixed(3)})`;
+    g.style.opacity = (c.o * (.75 + .25 * Math.sin(lt * 3 + i))).toFixed(3);
+    g.style.filter = `blur(${i === 0 ? 1.5 : 2.6}px)`;
+  });
+  fadeIn(els.s1eb, lt, .06, .5, 20);
+  const lines = els.s1h1.querySelectorAll('.line');
+  charsIn(lines[0], lt, .14, .045, .55, 100, -5);
+  charsIn(lines[1], lt, .38, .038, .6, 110, 5);
+  const k1 = seg(lt, .9, 2.9), k2 = seg(lt, 1.15, 3.1);
+  const p1 = E.outCubic(k1), p2 = E.outCubic(k2);
+  setT(els.kbd1, lerp(1280, -260, p1), 1120 + Math.sin(lt * 3) * 10, .95, -14 + 18 * p1, p1 > 0 ? 1 : 0);
+  setT(els.kbd2, lerp(1340, -220, p2), 1290 + Math.cos(lt * 2.6) * 12, .9, 10 - 20 * p2, p2 > 0 ? 1 : 0);
+}
+
+/* ---------------- s2 reveal ---------------- */
+function s2(S, t) {
+  const lt = t - S.start;
+  if (t < S.start || t > S.end) return;
+  fadeIn(els.s2eb, lt, .06, .45, 18);
+  const lines = els.s2h1.querySelectorAll('.line');
+  charsIn(lines[0], lt, .12, .045, .5, 70, -3);
+  charsIn(lines[1], lt, .27, .032, .55, 80, 3);
+  fadeIn(els.s2sub, lt, .55, .45, 18);
+
+  const pe = E.outQuint(seg(lt, 0, .5));
+  els.card2.style.top = lerp(700, 560, pe).toFixed(2) + 'px';
+  els.card2.style.height = '627px';
+  els.card2.style.opacity = clamp01(lt / .22).toFixed(3);
+  els.card2.style.transform = `scale(${lerp(.94, 1, pe).toFixed(4)})`;
+
+  const BW = 1000 / 1800;
+  const pin = E.inOutCubic(seg(lt, .35, .72));
+  const pout = E.inOutCubic(seg(lt, 1.24, 1.6));
+  const pz = Math.max(0, pin - pout);
+  const k = 1 + 1.8 * pz;
+  const cx = lerp(900, 125, pz);
+  const cy = lerp(564.5, 249, pz);
+  const ox = lerp(500, 194.4, pz);
+  const oy = lerp(313.5, 200, pz);
+  const px = ox - k * cx * BW, py = oy - k * cy * BW;
+  els.cam2.style.transform = `translate(${px.toFixed(2)}px,${py.toFixed(2)}px) scale(${k.toFixed(4)})`;
+
+  const cardTop = 560;
+  const proj = (ix, iy) => ({ x: CARD.x + px + k * ix * BW, y: cardTop + py + k * iy * BW });
+  const ringA = clamp01((lt - .7) / .3) * (1 - seg(lt, 1.24, 1.5));
+  const r1 = proj(10, 226), r2 = proj(284, 282);
+  placeRing(els.r2, r1.x, r1.y, r2.x - r1.x, r2.y - r1.y, ringA, lt * 5);
+  const pA = clamp01((lt - .82) / .3) * (1 - seg(lt, 1.24, 1.5));
+  placePill(els.p2, 566, 782, pA, (1 - E.outCubic(clamp01((lt - .82) / .3))) * 18);
+  els.arrow2.style.left = '470px';
+  els.arrow2.style.top = '798px';
+  els.arrow2.style.width = '86px';
+  els.arrow2.style.opacity = (pA * .95).toFixed(3);
+
+  const pm = E.inOutCubic(seg(lt, 1.58, 2.16));
+  els.card2.style.top = lerp(560, 520, pm).toFixed(2) + 'px';
+  els.card2.style.height = lerp(627, 751, pm).toFixed(2) + 'px';
+  els.side2.style.transform = `translateX(${(-186 * pm).toFixed(2)}px)`;
+  els.side2.style.opacity = (1 - clamp01(pm * 1.2)).toFixed(3);
+  els.panel2.style.left = lerp(164.4, 0, pm).toFixed(2) + 'px';
+  els.panel2.style.width = lerp(835.6, 1000, pm).toFixed(2) + 'px';
+
+  const pc = clamp01((lt - 2.4) / .4);
+  placePill(els.p2b, 300, 1290, pc, (1 - E.outCubic(pc)) * 20);
+}
+
+/* ---------------- s3 web DeepSeek ---------------- */
+function s3(S, t) {
+  const lt = t - S.start;
+  if (t < S.start || t > S.end) return;
+  fadeIn(els.s3eb, lt, .04, .4, 16);
+  const lines = els.s3h1.querySelectorAll('.line');
+  charsIn(lines[0], lt, .1, .042, .45, 62, -3);
+  charsIn(lines[1], lt, .22, .036, .5, 72, 3);
+  fadeIn(els.s3sub, lt, .44, .4, 16);
+
+  const p = E.inOutCubic(seg(lt, 0, .62));
+  const k = lerp(1, 1.3, p);
+  const cx = lerp(752, 600, p);
+  const cy = lerp(564.5, 430, p);
+  const ox = lerp(500, 514.2, p);
+  const oy = lerp(375.5, k * cy * 0.665, p);
+  camera(els.cam3, 1504, 1129, k, cx, cy, ox, oy);
+
+  // ring on the DeepSeek web feature chips (深度思考 / 智能搜索)
+  const a = clamp01((lt - .75) / .3);
+  const c1 = project(380, 592, 1504, 1129, k, cx, cy, ox, oy);
+  const c2 = project(780, 642, 1504, 1129, k, cx, cy, ox, oy);
+  placeRing(els.r3, c1.x, c1.y, c2.x - c1.x, c2.y - c1.y, a, lt * 5);
+
+  const pa = clamp01((lt - .95) / .35);
+  placePill(els.p3a, 104, 1300, pa, (1 - E.outCubic(pa)) * 18);
+  const pb = clamp01((lt - 1.25) / .35);
+  placePill(els.p3b, 486, 1300, pb, (1 - E.outCubic(pb)) * 18);
+}
+
+/* ---------------- s4 multi-tab ---------------- */
+function s4(S, t) {
+  const lt = t - S.start;
+  if (t < S.start || t > S.end) return;
+  fadeIn(els.s4eb, lt, .04, .4, 16);
+  const lines = els.s4h1.querySelectorAll('.line');
+  charsIn(lines[0], lt, .08, .04, .45, 60, -3);
+  charsIn(lines[1], lt, .2, .035, .5, 70, 3);
+  fadeIn(els.s4sub, lt, .45, .4, 16);
+
+  const p = E.inOutCubic(seg(lt, 0, .7));
+  const k = lerp(1, 1.55, p);
+  const cx = lerp(752, 470, p);
+  const cy = lerp(564.5, 330, p);
+  const ox = 500;
+  const oy = lerp(375.5, k * cy * 0.665, p);
+  camera(els.cam4, 1504, 1129, k, cx, cy, ox, oy);
+
+  const a = clamp01((lt - .75) / .3);
+  const t1 = project(0, 46, 1504, 1129, k, cx, cy, ox, oy);
+  const t2 = project(362, 112, 1504, 1129, k, cx, cy, ox, oy);
+  placeRing(els.r4, t1.x, t1.y, t2.x - t1.x, t2.y - t1.y, a, lt * 5);
+  const q1 = project(384, 50, 1504, 1129, k, cx, cy, ox, oy);
+  const q2 = project(424, 92, 1504, 1129, k, cx, cy, ox, oy);
+  placeRing(els.r4b, q1.x, q1.y, q2.x - q1.x, q2.y - q1.y, a, lt * 5 + .8);
+
+  const pillP = clamp01((lt - 1.0) / .35);
+  placePill(els.p4, 106, 1300, pillP, (1 - E.outCubic(pillP)) * 18);
+}
+
+/* ---------------- s5 custom background ---------------- */
+function s5(S, t) {
+  const lt = t - S.start;
+  if (t < S.start || t > S.end) return;
+  fadeIn(els.s5eb, lt, .04, .4, 16);
+  const lines = els.s5h1.querySelectorAll('.line');
+  charsIn(lines[0], lt, .12, .05, .5, 74, -3);
+  charsIn(lines[1], lt, .3, .04, .55, 84, 3);
+  fadeIn(els.s5sub, lt, .55, .45, 18);
+
+  const pe = E.outQuint(seg(lt, 0, .55));
+  els.card5.style.opacity = clamp01(lt / .25).toFixed(3);
+  els.card5.style.transform = `translateY(${((1 - pe) * 70).toFixed(1)}px) scale(${lerp(.93, 1, pe).toFixed(4)})`;
+
+  const g = E.inOutCubic(seg(lt, .45, 1.45));
+  els.gloss5.style.opacity = (Math.sin(g * Math.PI) * .9).toFixed(3);
+  els.gloss5.style.transform = `translateX(${lerp(-60, 70, g).toFixed(1)}%) rotate(0deg)`;
+
+  const pa = clamp01((lt - 1.0) / .4);
+  placePill(els.p5, 120, 1300, pa, (1 - E.outCubic(pa)) * 18);
+}
+
+/* ---------------- s6 background options ---------------- */
+function s6(S, t) {
+  const lt = t - S.start;
+  if (t < S.start || t > S.end) return;
+  fadeIn(els.s6eb, lt, .04, .4, 16);
+  const lines = els.s6h1.querySelectorAll('.line');
+  charsIn(lines[0], lt, .08, .036, .45, 60, -3);
+  charsIn(lines[1], lt, .2, .032, .5, 70, 3);
+  fadeIn(els.s6sub, lt, .42, .4, 16);
+
+  const p = E.inOutCubic(seg(lt, 0, 1.1));
+  const k = lerp(1, 1.12, p);
+  const cx = lerp(752, 720, p), cy = lerp(564.5, 470, p);
+  const ox = 500, oy = lerp(375.5, 300, p);
+  camera(els.cam6, 1504, 1129, k, cx, cy, ox, oy);
+
+  els.optEls.forEach((el, i) => {
+    const t0 = .5 + i * .17;
+    const pp = clamp01((lt - t0) / .4);
+    const e = E.outBack(pp, 1.5);
+    el.style.opacity = clamp01(pp * 1.6).toFixed(3);
+    el.style.transform = `translateY(${((1 - e) * 20).toFixed(1)}px) scale(${lerp(.9, 1, e).toFixed(3)})`;
+  });
+}
+
+/* ---------------- s7 menu + history ---------------- */
+function s7(S, t) {
+  const lt = t - S.start;
+  if (t < S.start || t > S.end) return;
+  fadeIn(els.s7eb, lt, .03, .4, 16);
+  const lines = els.s7h1.querySelectorAll('.line');
+  charsIn(lines[0], lt, .06, .035, .45, 60, -3);
+  charsIn(lines[1], lt, .17, .03, .5, 70, 2);
+  fadeIn(els.s7sub, lt, .38, .4, 16);
+
+  // ---- phase A: context menu
+  const pa = E.inOutCubic(seg(lt, 0, .6));
+  camera(els.cam7a, 1504, 1129, lerp(1, 2.3, pa), lerp(752, 760, pa), lerp(564.5, 470, pa), 500, lerp(375.5, 300, pa));
+  const mp = clamp01((lt - .28) / .28);
+  const out7 = clamp01((lt - 1.34) / .24);
+  els.dim7.style.opacity = (mp * .5 * (1 - out7)).toFixed(3);
+  els.ctx7.style.opacity = (mp * (1 - out7)).toFixed(3);
+  const scale = 0.665 * lerp(1, 2.3, pa);
+  els.ctx7.style.transform = `translate(${(648 + (1 - E.outCubic(mp)) * 16).toFixed(1)}px,${(578 + (1 - E.outCubic(mp)) * 12).toFixed(1)}px) scale(${scale.toFixed(4)})`;
+  let active = -1;
+  if (lt > .72) active = 4;
+  if (lt > 1.02) active = 5;
+  if (lt > 1.3) active = 6;
+  els.ctxItems.forEach((it, i) => {
+    const on = i === active;
+    const dis = i === 8;
+    it.style.background = on ? 'rgba(15,17,21,.13)' : 'transparent';
+    it.style.color = dis ? '#c9c9c9' : '#0f1115';
+    it.style.fontWeight = on ? '600' : '400';
+  });
+  const cyItem = active >= 0 ? 578 + els.ctxOffsets[active] * scale : 0;
+  els.cur7.style.opacity = (mp * (active >= 0 ? 1 : 0) * (1 - out7)).toFixed(3);
+  els.cur7.style.transform = `translate(${(600 + Math.sin(lt * 2.2) * 3).toFixed(1)}px,${(cyItem - 16).toFixed(1)}px) rotate(-6deg)`;
+  els.card7a.style.opacity = (1 - clamp01((lt - 1.34) / .24)).toFixed(3);
+
+  // ---- phase B: history
+  const hist = clamp01((lt - 1.38) / .26);
+  els.card7b.style.opacity = hist.toFixed(3);
+  const ph = E.inOutCubic(seg(lt, 1.4, 2.6));
+  const hk = lerp(1, 1.22, ph), hcx = lerp(752, 700, ph), hcy = lerp(564.5, 330, ph);
+  const hoy = lerp(cyTop(564.5, 1), cyTop(330, 1.22), ph);
+  camera(els.cam7b, 1504, 1129, hk, hcx, hcy, 500, hoy);
+  const ha = clamp01((lt - 1.95) / .3);
+  const s1r = project(452, 82, 1504, 1129, hk, hcx, hcy, 500, hoy);
+  const s2r = project(952, 121, 1504, 1129, hk, hcx, hcy, 500, hoy);
+  placeRing(els.r7, s1r.x, s1r.y, s2r.x - s1r.x, s2r.y - s1r.y, ha, lt * 5);
+  const d1 = project(286, 142, 1504, 1129, hk, hcx, hcy, 500, hoy);
+  const d2 = project(334, 162, 1504, 1129, hk, hcx, hcy, 500, hoy);
+  placeRing(els.r7b, d1.x, d1.y, d2.x - d1.x, d2.y - d1.y, ha, lt * 5 + .8);
+
+  placePill(els.p7a, 120, 1300, clamp01((lt - .7) / .3) * (1 - clamp01((lt - 1.4) / .25)), 0);
+  const pb = clamp01((lt - 2.1) / .3);
+  placePill(els.p7b, 120, 1300, pb, (1 - E.outCubic(pb)) * 18);
+}
+function cyTop(cy, k) { return cy * k * 0.665; }
+
+/* ---------------- s8 CTA ---------------- */
+function s8(S, t) {
+  const lt = t - S.start;
+  if (t < S.start || t > S.end) return;
+  const pbd = clamp01((lt - .05) / .4);
+  els.badge8.style.opacity = (.9 * E.outCubic(pbd)).toFixed(3);
+  els.badge8.style.transform = `translateY(${((1 - E.outCubic(pbd)) * 14).toFixed(1)}px)`;
+
+  const pl = clamp01((lt - .15) / .55);
+  const e = E.outBack(pl, 1.9);
+  els.logo8.style.opacity = clamp01(pl * 2).toFixed(3);
+  els.logo8.style.transform = `scale(${lerp(.6, 1, e).toFixed(4)})`;
+  els.logo8.style.filter = `drop-shadow(0 0 70px rgba(120,90,255,${(.4 + .2 * Math.sin(lt * 4)).toFixed(2)}))`;
+
+  const pw = clamp01((lt - .5) / .5);
+  els.word8.style.opacity = E.outCubic(pw).toFixed(3);
+  els.word8.style.transform = `translateY(${((1 - E.outCubic(pw)) * 24).toFixed(1)}px)`;
+  const pt = clamp01((lt - .72) / .45);
+  els.tag8.style.opacity = (.8 * E.outCubic(pt)).toFixed(3);
+  els.tag8.style.transform = `translateY(${((1 - E.outCubic(pt)) * 18).toFixed(1)}px)`;
+
+  const pc = clamp01((lt - .95) / .5);
+  els.code8.style.opacity = E.outCubic(pc).toFixed(3);
+  els.code8.style.transform = `translateY(${((1 - E.outCubic(pc)) * 22).toFixed(1)}px) scale(${lerp(.96, 1, E.outCubic(pc)).toFixed(3)})`;
+
+  const pg = clamp01((lt - 1.55) / .5);
+  els.gh8.style.opacity = E.outCubic(pg).toFixed(3);
+  els.gh8.style.transform = `translateY(${((1 - E.outCubic(pg)) * 20).toFixed(1)}px)`;
+  const ps = clamp01((lt - 2.15) / .45);
+  els.star8.style.opacity = (.85 * E.outCubic(ps)).toFixed(3);
+  els.star8.style.transform = `translateY(${((1 - E.outCubic(ps)) * 16).toFixed(1)}px)`;
+  const pv = clamp01((lt - 2.45) / .4);
+  els.vtag8.style.opacity = (.85 * E.outCubic(pv)).toFixed(3);
+}
+</script>
+</body>
+</html>

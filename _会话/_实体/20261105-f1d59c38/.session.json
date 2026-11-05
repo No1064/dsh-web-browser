@@ -1,0 +1,23 @@
+{
+  "session_id": "session-f1d59c38-a12c-4793-a9af-149e0590c07b",
+  "entity": "20261105-f1d59c38",
+  "alias": "生成项目抖音宣传视频-f1d59c38",
+  "created": "2026-11-05T23:11:31",
+  "session_started": "2026-11-05T23:11:31",
+  "title_latest": "生成项目抖音宣传视频",
+  "titles": [
+    {
+      "title": "帮我给这个项目生成一个宣传",
+      "seq": 16,
+      "time": 1793891510403,
+      "kind": "fallback"
+    },
+    {
+      "title": "生成项目抖音宣传视频",
+      "seq": 18,
+      "time": 1793891511408,
+      "kind": "provider"
+    }
+  ],
+  "log": "/Users/chenhy/.dsh/sessions/--Users-chenhy-Code-05~0020~5DE5~5177~00B7~6280~80FD~00B7~811A~672C-dsh-web-browser--/session-f1d59c38-a12c-4793-a9af-149e0590c07b/session.v4.jsonl.zstd"
+}

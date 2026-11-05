@@ -1,0 +1,25 @@
+# CREDITS — SWISS MOTION 10 s test
+
+## 风格与工具
+
+- **Style prompt**: `styles/swiss-motion/STYLE.md` from
+  [lemo-opuscar](https://github.com/lemomo-ai/lemo-opuscar), © LemoLab, MIT.
+- **Render / mux / readcheck tools**: `core/render/` from the same library, MIT
+  (`video.mjs`, `mux.sh`, `readcheck.mjs`, `still.mjs`, `serve.mjs`, `page.mjs`).
+- The film itself is ours; no LemoLab credit is required on it, and none is implied.
+
+## 字体（SIL Open Font License 1.1）
+
+- **Inter** — Rasmus Andersson, OFL 1.1. Latin subset (400/600/700) via the Google Fonts
+  CSS API `text=` subset, self-hosted in `fonts/`.
+- **Noto Sans SC** — Google, OFL 1.1. Chinese subset (400/700) of the characters used.
+
+## 声音
+
+- 全部由 `audio/make_audio.py` 用 numpy/scipy 程序化合成（正弦、噪声、biquad 滤波、包络），
+  **不含任何采样、歌曲、人声或第三方素材**。
+- 母带：ffmpeg `loudnorm` + `alimiter`，成片经 `mux.sh` 复测 −13.8 LUFS / −1.4 dBFS。
+
+## 画面
+
+- 无第三方图片、无素材库、无字体之外的外部资产。

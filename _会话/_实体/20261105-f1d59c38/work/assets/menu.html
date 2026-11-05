@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<!--
+  DSH WebBrowser · 右键菜单复刻（宣传片素材，可集成）
+  ------------------------------------------------------------------
+  结构 / 尺寸 / 字号 / 圆角 / 阴影全部对齐
+  src/features/30-context-menu.js 的 .dbp-ctx-menu / .dbp-ctx-item / .dbp-ctx-separator。
+  颜色取 DSH 内置 light 主题 token 的解析值（见 ui-assets-README.md）：
+    --dsw-alias-bg-layer-1      = #fff
+    --dsw-alias-label-primary   = #0f1115
+    --dsw-alias-border-l2       = rgba(0,0,0,.1)      （.5px 边框）
+    --dsw-alias-border-l1       = rgba(0,0,0,.04)     （分隔线）
+    --dsw-alias-brand-primary   = #0f1115             （hover 文字 + 12% 底色）
+    --dsw-alias-state-idle-primary = #d4d4d4          （禁用项）
+  示例状态（Electron context-menu payload）：
+    isEditable=true, selectionText 非空, linkURL 非空, canGoBack=true, canGoForward=false, zoom=1
+  → 菜单项与顺序即 dbpCtxBuildItems() 在该分支下的真实输出。
+  hover 高亮示例落在「用 Chrome 打开链接」，用 .is-hot 类表达（同时保留 :hover 行为）。
+  整页背景透明，可直接在 Playwright 中 element.screenshot('.dbp-ctx-menu') 或整页录制。
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>DSH WebBrowser · 右键菜单</title>
+<style>
+  :root{
+    --bg-layer-1:#fff;
+    --label-primary:#0f1115;
+    --brand-primary:#0f1115;
+    --border-l1:rgba(0,0,0,.04);
+    --border-l2:rgba(0,0,0,.1);
+    --state-idle-primary:#d4d4d4;
+    --ctx-shadow:0 8px 24px rgba(15,17,21,.18);
+  }
+  html,body{margin:0;padding:0;background:transparent}
+  body{
+    font-family:'OPPO Sans 4.0','Hiragino Sans GB','PingFang SC',system-ui,-apple-system,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:geometricPrecision;
+  }
+  /* 供整页截图/录制时留出阴影呼吸空间；集成到宣传片时可直接只取 .dbp-ctx-menu。 */
+  .dbp-ctx-stage{display:inline-block;padding:40px;background:transparent}
+
+  /* ↓↓↓ 以下规则与 src/features/30-context-menu.js 的 featureCss 逐条对应 ↓↓↓ */
+  .dbp-ctx-menu{
+    position:relative;box-sizing:border-box;min-width:196px;max-width:280px;
+    padding:4px;border:.5px solid var(--border-l2);border-radius:8px;
+    background:var(--bg-layer-1);box-shadow:var(--ctx-shadow);
+    color:var(--label-primary);font-size:12px;line-height:1.2;outline:0;
+    user-select:none;-webkit-user-select:none;
+  }
+  .dbp-ctx-item{
+    display:flex;align-items:center;width:100%;height:28px;padding:0 8px;
+    border:0;border-radius:5px;background:transparent;color:inherit;
+    font-size:12px;font-family:inherit;text-align:left;white-space:nowrap;cursor:pointer;
+    box-sizing:border-box;
+  }
+  .dbp-ctx-item:hover:not(:disabled),
+  .dbp-ctx-item:focus-visible:not(:disabled),
+  .dbp-ctx-item.is-hot:not(:disabled){
+    background:rgba(15,17,21,.12);color:var(--brand-primary);outline:0;
+  }
+  .dbp-ctx-item:disabled{color:var(--state-idle-primary);cursor:default}
+  .dbp-ctx-separator{height:1px;margin:4px 6px;background:var(--border-l1)}
+  /* ↑↑↑ 对齐结束 ↑↑↑ */
+</style>
+</head>
+<body>
+<div class="dbp-ctx-stage">
+  <div id="dbp-ctx-menu" class="dbp-ctx-menu" role="menu" tabindex="-1" aria-label="页面菜单">
+    <button type="button" role="menuitem" class="dbp-ctx-item">剪切</button>
+    <button type="button" role="menuitem" class="dbp-ctx-item">复制</button>
+    <button type="button" role="menuitem" class="dbp-ctx-item">粘贴</button>
+    <button type="button" role="menuitem" class="dbp-ctx-item">全选</button>
+    <div class="dbp-ctx-separator" role="separator"></div>
+    <button type="button" role="menuitem" class="dbp-ctx-item">在新标签页打开链接</button>
+    <button type="button" role="menuitem" class="dbp-ctx-item">复制链接地址</button>
+    <button type="button" role="menuitem" class="dbp-ctx-item is-hot" data-hot="true">用 Chrome 打开链接</button>
+    <div class="dbp-ctx-separator" role="separator"></div>
+    <button type="button" role="menuitem" class="dbp-ctx-item">后退</button>
+    <button type="button" role="menuitem" class="dbp-ctx-item" disabled>前进</button>
+    <button type="button" role="menuitem" class="dbp-ctx-item">刷新</button>
+    <div class="dbp-ctx-separator" role="separator"></div>
+    <button type="button" role="menuitem" class="dbp-ctx-item">复制页面地址</button>
+    <button type="button" role="menuitem" class="dbp-ctx-item">用 Chrome 打开此页</button>
+    <div class="dbp-ctx-separator" role="separator"></div>
+    <button type="button" role="menuitem" class="dbp-ctx-item">放大</button>
+    <button type="button" role="menuitem" class="dbp-ctx-item">缩小</button>
+    <button type="button" role="menuitem" class="dbp-ctx-item" disabled>重置缩放</button>
+  </div>
+</div>
+</body>
+</html>

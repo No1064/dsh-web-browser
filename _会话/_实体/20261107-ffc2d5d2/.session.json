@@ -1,0 +1,23 @@
+{
+  "session_id": "session-ffc2d5d2-ae70-4f90-8081-528eb44f1d04",
+  "entity": "20261107-ffc2d5d2",
+  "alias": "Deepseek-Harness-文章借鉴分析-ffc2d5d2",
+  "created": "2026-11-07T00:21:13",
+  "session_started": "2026-11-07T00:21:13",
+  "title_latest": "Deepseek Harness 文章借鉴分析",
+  "titles": [
+    {
+      "title": "https://mp.weixin.qq.com/s/i8x27dFqpfaNE",
+      "seq": 16,
+      "time": 1793982098255,
+      "kind": "fallback"
+    },
+    {
+      "title": "Deepseek Harness 文章借鉴分析",
+      "seq": 18,
+      "time": 1793982098893,
+      "kind": "provider"
+    }
+  ],
+  "log": "/Users/chenhy/.dsh/sessions/--Users-chenhy-Code-05~0020~5DE5~5177~00B7~6280~80FD~00B7~811A~672C-dsh-web-browser--/session-ffc2d5d2-ae70-4f90-8081-528eb44f1d04/session.v4.jsonl.zstd"
+}

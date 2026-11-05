@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<!--
+  DSH WebBrowser · 浏览历史整页复刻（宣传片素材）
+  ------------------------------------------------------------------
+  画布：1504 × 1129 CSS px（= 宣传片里浏览器面板区，见 screenshots/ 中 1800×1129 截图去掉 296px 左侧栏），
+        用 --force-device-scale-factor=2 截图得到 3008 × 2258 PNG。
+  结构依据：
+    · 浏览器外壳（工具栏 / 标签页 / 底栏）来自 src/core.js 的 CSS 与 icon() 路径；
+    · 历史页来自 src/features/70-history.js 的 HistoryPage 结构与 HIST_CSS：
+      头部（返回 / 标题 / 共 N 条 / 搜索 / 清空全部）、按日期分组的列表、行内时间与删除、
+      「显示更多」按钮；max-width 960 居中。
+  色值依据 DSH 内置 light 主题 token（见 ui-assets-README.md）：
+    bg-base / bg-layer-1 #fff · label-primary #0f1115 · label-secondary #61666b
+    border-l1 rgba(0,0,0,.04) · border-l2 rgba(0,0,0,.1)
+    brand-primary #0f1115 · state-idle-primary #d4d4d4
+    state-error-primary #ec1313 · state-warn-primary #f59e0b
+  示例数据全部为公开站点，无个人信息；favicon 用源码 bookmarks 的「字母色块」语言示意（源码历史页本无 favicon）。
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>DSH WebBrowser · 浏览历史</title>
+<style>
+  :root{
+    --dsw-alias-bg-base:#fff;
+    --dsw-alias-bg-layer-1:#fff;
+    --dsw-alias-label-primary:#0f1115;
+    --dsw-alias-label-secondary:#61666b;
+    --dsw-alias-label-tertiary:#81858c;
+    --dsw-alias-border-l1:rgba(0,0,0,.04);
+    --dsw-alias-border-l2:rgba(0,0,0,.1);
+    --dsw-alias-brand-primary:#0f1115;
+    --dsw-alias-state-idle-primary:#d4d4d4;
+    --dsw-alias-state-error-primary:#ec1313;
+    --dsw-alias-state-warn-primary:#f59e0b;
+    --dsw-static-deepseek-500:#4176e6;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;height:100%;background:var(--dsw-alias-bg-base);overflow:hidden}
+  body{
+    width:1504px;height:1129px;
+    font-family:'OPPO Sans 4.0','Hiragino Sans GB','PingFang SC',system-ui,-apple-system,sans-serif;
+    color:var(--dsw-alias-label-primary);
+    font-size:13px;line-height:1.4;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:geometricPrecision;
+  }
+  ::-webkit-scrollbar{width:0;height:0}
+
+  /* ===== 面板根（src/core.js .dbp-root） ===== */
+  .dbp-root{
+    position:relative;box-sizing:border-box;display:flex;flex-direction:column;
+    width:100%;height:100%;min-height:0;overflow:hidden;
+    background:var(--dsw-alias-bg-base);color:var(--dsw-alias-label-primary);
+    font-size:13px;line-height:1.4;
+  }
+
+  /* ===== 工具栏（.dbp-toolbar / .dbp-tool / .dbp-addressWrap…） ===== */
+  .dbp-toolbar{
+    display:flex;align-items:center;gap:4px;flex:none;height:40px;padding:0 8px;
+    border-bottom:.5px solid var(--dsw-alias-border-l1);
+  }
+  .dbp-tool{
+    display:inline-flex;align-items:center;justify-content:center;flex:none;
+    width:28px;height:28px;padding:0;border:0;border-radius:6px;
+    background:transparent;color:var(--dsw-alias-label-secondary);cursor:pointer;
+  }
+  .dbp-tool:hover:not(:disabled){color:var(--dsw-alias-label-primary);background:color-mix(in srgb, var(--dsw-alias-label-primary) 8%, transparent)}
+  .dbp-tool:disabled{color:var(--dsw-alias-state-idle-primary);cursor:default}
+  .dbp-addressWrap{
+    display:flex;align-items:center;flex:auto;min-width:0;height:28px;padding:0 4px 0 10px;
+    border:.5px solid var(--dsw-alias-border-l2);border-radius:7px;
+    background:var(--dsw-alias-bg-layer-1);
+  }
+  .dbp-address{
+    flex:auto;min-width:0;height:100%;border:0;outline:0;background:transparent;
+    color:var(--dsw-alias-label-primary);font-size:12px;font-family:inherit;padding:0;
+  }
+  .dbp-address::placeholder{color:var(--dsw-alias-label-secondary)}
+  .dbp-go{
+    flex:none;height:22px;padding:0 8px;border:0;border-radius:5px;background:transparent;
+    color:var(--dsw-alias-brand-primary);font-size:12px;font-family:inherit;cursor:pointer;
+  }
+  .dbp-external{
+    flex:none;display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 9px;
+    border:.5px solid var(--dsw-alias-border-l2);border-radius:6px;background:transparent;
+    color:var(--dsw-alias-label-secondary);font-size:12px;font-family:inherit;cursor:pointer;white-space:nowrap;
+  }
+  /* 历史页激活时，工具栏的「浏览历史」按钮高亮（.dbp-hist-tool[data-active="true"]） */
+  .dbp-hist-tool[data-active="true"]{
+    color:var(--dsw-alias-brand-primary);
+    background:color-mix(in srgb, var(--dsw-alias-brand-primary) 12%, transparent);
+  }
+
+  /* ===== 标签页（.dbp-tabs / .dbp-tab） ===== */
+  .dbp-tabs{
+    display:flex;align-items:stretch;gap:2px;flex:none;height:34px;padding:3px 8px 0;
+    border-bottom:.5px solid var(--dsw-alias-border-l1);overflow:hidden;
+  }
+  .dbp-tab{
+    display:inline-flex;align-items:center;gap:6px;flex:none;max-width:220px;min-width:120px;height:30px;
+    padding:0 6px 0 11px;border:0;border-radius:7px 7px 0 0;background:transparent;
+    color:var(--dsw-alias-label-secondary);font-size:12px;font-family:inherit;cursor:pointer;
+  }
+  .dbp-tab[data-active="true"]{background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary)}
+  .dbp-tabTitle{flex:auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left}
+  .dbp-tabClose{
+    display:inline-flex;align-items:center;justify-content:center;flex:none;width:18px;height:18px;
+    border:0;border-radius:4px;background:transparent;color:var(--dsw-alias-label-secondary);cursor:pointer;
+  }
+  .dbp-tabAdd{
+    display:inline-flex;align-items:center;justify-content:center;flex:none;width:26px;height:26px;
+    margin-top:2px;border:0;border-radius:5px;background:transparent;
+    color:var(--dsw-alias-label-secondary);cursor:pointer;
+  }
+
+  .ico{display:block;pointer-events:none}
+
+  /* ===== 视口区 + 历史页（.dbp-viewportStack / .dbp-hist…） ===== */
+  .dbp-viewportStack{position:relative;display:flex;flex:auto;min-height:0;min-width:0}
+  .dbp-hist{
+    position:absolute;inset:0;display:flex;flex-direction:column;flex:auto;min-height:0;
+    height:100%;overflow:hidden;background:var(--dsw-alias-bg-base);
+    color:var(--dsw-alias-label-primary);font-size:13px;line-height:1.4;
+  }
+  .dbp-hist-inner{display:flex;flex-direction:column;flex:auto;min-height:0;width:100%;max-width:960px;margin:0 auto}
+  .dbp-hist-head{
+    display:flex;align-items:center;gap:10px;flex:none;padding:14px 20px 12px;
+    border-bottom:.5px solid var(--dsw-alias-border-l1);
+  }
+  .dbp-hist-back{
+    display:inline-flex;align-items:center;justify-content:center;flex:none;width:28px;height:28px;
+    padding:0;border:0;border-radius:6px;background:transparent;
+    color:var(--dsw-alias-label-secondary);cursor:pointer;
+  }
+  .dbp-hist-title{flex:none;font-size:15px;font-weight:600;letter-spacing:.01em;white-space:nowrap}
+  .dbp-hist-count{flex:none;color:var(--dsw-alias-label-secondary);font-size:11px;white-space:nowrap}
+  .dbp-hist-searchWrap{
+    display:flex;align-items:center;gap:6px;flex:auto;min-width:100px;height:30px;padding:0 10px;
+    border:.5px solid var(--dsw-alias-border-l2);border-radius:8px;background:var(--dsw-alias-bg-layer-1);
+  }
+  .dbp-hist-searchIcon{display:inline-flex;align-items:center;justify-content:center;flex:none;color:var(--dsw-alias-label-secondary)}
+  .dbp-hist-search{
+    flex:auto;min-width:0;height:100%;border:0;outline:0;background:transparent;
+    color:var(--dsw-alias-label-primary);font-size:12px;font-family:inherit;
+  }
+  .dbp-hist-search::placeholder{color:var(--dsw-alias-label-secondary)}
+  .dbp-hist-btn{
+    display:inline-flex;align-items:center;justify-content:center;flex:none;height:28px;padding:0 11px;
+    border:.5px solid var(--dsw-alias-border-l2);border-radius:7px;background:transparent;
+    color:var(--dsw-alias-label-secondary);font-size:12px;font-family:inherit;white-space:nowrap;cursor:pointer;
+  }
+  .dbp-hist-btn[data-danger="true"]{
+    color:var(--dsw-alias-state-error-primary);
+    border-color:color-mix(in srgb, var(--dsw-alias-state-error-primary) 40%, transparent);
+  }
+  .dbp-hist-list{flex:auto;min-height:0;overflow:auto;padding:2px 12px 28px}
+  .dbp-hist-groupWrap{display:block}
+  .dbp-hist-group{
+    position:sticky;top:0;z-index:1;display:flex;align-items:baseline;gap:8px;
+    padding:14px 8px 6px;background:var(--dsw-alias-bg-base);
+    color:var(--dsw-alias-label-secondary);font-size:11px;font-weight:600;letter-spacing:.04em;
+  }
+  .dbp-hist-groupCount{color:var(--dsw-alias-label-secondary);font-size:11px;font-weight:400;opacity:.75}
+  .dbp-hist-rows{display:flex;flex-direction:column;gap:2px;margin:0;padding:0 0 2px;list-style:none}
+  .dbp-hist-item{display:flex;align-items:center;gap:10px;padding:2px 8px;border-radius:8px}
+  .dbp-hist-item:hover,.dbp-hist-item.is-hover{background:color-mix(in srgb, var(--dsw-alias-label-primary) 5%, transparent)}
+  .dbp-hist-open{
+    display:flex;flex:auto;min-width:0;flex-direction:row;align-items:center;gap:10px;
+    padding:6px 2px;border:0;border-radius:6px;background:transparent;
+    color:var(--dsw-alias-label-primary);font-family:inherit;text-align:left;cursor:pointer;
+  }
+  .dbp-hist-open:hover .dbp-hist-itemTitle,.dbp-hist-open:focus-visible .dbp-hist-itemTitle{color:var(--dsw-alias-brand-primary)}
+  .dbp-hist-fav{
+    flex:none;display:inline-flex;align-items:center;justify-content:center;
+    width:16px;height:16px;border-radius:4px;
+    font-size:9.5px;font-weight:600;line-height:1;
+    background:color-mix(in srgb, hsl(var(--h,220) 68% 52%) 20%, #fff);
+    color:color-mix(in srgb, hsl(var(--h,220) 62% 42%) 78%, #0f1115);
+  }
+  .dbp-hist-text{display:flex;flex:auto;min-width:0;flex-direction:column;gap:1px}
+  .dbp-hist-itemTitle{font-size:13px;line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .dbp-hist-itemUrl{font-size:11.5px;line-height:1.4;color:var(--dsw-alias-label-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .dbp-hist-time{flex:none;font-size:11px;color:var(--dsw-alias-label-secondary);font-variant-numeric:tabular-nums}
+  .dbp-hist-del{
+    display:inline-flex;align-items:center;justify-content:center;flex:none;width:24px;height:24px;
+    padding:0;border:0;border-radius:6px;background:transparent;
+    color:var(--dsw-alias-label-secondary);cursor:pointer;opacity:0;transition:opacity .12s ease;
+  }
+  .dbp-hist-item:hover .dbp-hist-del,.dbp-hist-item.is-hover .dbp-hist-del{opacity:1}
+  .dbp-hist-more{
+    display:block;margin:14px auto 0;height:30px;padding:0 16px;
+    border:.5px solid var(--dsw-alias-border-l2);border-radius:15px;background:var(--dsw-alias-bg-layer-1);
+    color:var(--dsw-alias-label-primary);font-size:12px;font-family:inherit;cursor:pointer;
+  }
+
+  /* ===== 底栏（.dbp-footer） ===== */
+  .dbp-footer{
+    display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:10px;
+    flex:none;height:26px;padding:0 10px;border-top:.5px solid var(--dsw-alias-border-l1);
+    color:var(--dsw-alias-label-secondary);font-size:11px;
+  }
+  .dbp-footerLeft{display:flex;align-items:center;gap:4px;min-width:0;white-space:nowrap;overflow:hidden}
+  .dbp-footerCenter{text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .dbp-footerRight{display:flex;align-items:center;justify-content:flex-end;gap:8px;white-space:nowrap}
+  .dbp-footerUpdate{border:0;background:transparent;color:var(--dsw-alias-brand-primary);font-size:11px;font-family:inherit;cursor:pointer;padding:0}
+</style>
+</head>
+<body>
+<div class="dbp-root">
+
+  <!-- ======== 工具栏 ======== -->
+  <div class="dbp-toolbar">
+    <button type="button" class="dbp-tool" title="后退" aria-label="后退">
+      <svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5 8 12l7 7"/></svg>
+    </button>
+    <button type="button" class="dbp-tool" title="前进" aria-label="前进">
+      <svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg>
+    </button>
+    <button type="button" class="dbp-tool" title="刷新" aria-label="刷新">
+      <svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v5h-5"/></svg>
+    </button>
+    <form class="dbp-addressWrap" onsubmit="return false">
+      <input class="dbp-address" type="text" value="https://chat.deepseek.com/" spellcheck="false" autocomplete="off" aria-label="网址">
+      <button type="submit" class="dbp-go">前往</button>
+    </form>
+    <button type="button" class="dbp-external" title="用 Chrome 打开">
+      <svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4 10 14"/><path d="M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/></svg>
+      <span>用 Chrome 打开</span>
+    </button>
+    <button type="button" class="dbp-tool" title="新标签页" aria-label="新标签页">
+      <svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+    </button>
+    <button type="button" class="dbp-tool" title="主页" aria-label="主页">
+      <svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5 12 4l8 6.5"/><path d="M6 9.8V20h12V9.8"/><path d="M10.5 20v-5h3v5"/></svg>
+    </button>
+    <button type="button" class="dbp-tool" title="钉住当前页" aria-label="钉住当前页">
+      <svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3.6 2.6 5.4 5.9.8-4.3 4.2 1.1 5.9L12 17l-5.3 2.9 1.1-5.9L3.5 9.8l5.9-.8z"/></svg>
+    </button>
+    <button type="button" class="dbp-tool" title="主页与常用网址设置" aria-label="主页与常用网址设置">
+      <svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3.1"/><path d="M12 3.2v2.1M12 18.7v2.1M4.8 12H2.7M21.3 12h-2.1M6.9 6.9 5.4 5.4M18.6 18.6l-1.5-1.5M17.1 6.9l1.5-1.5M5.4 18.6l1.5-1.5"/></svg>
+    </button>
+    <button type="button" class="dbp-tool dbp-hist-tool" data-active="true" title="浏览历史" aria-label="浏览历史">
+      <svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 2.6-6.4"/><path d="M3 4v4.5h4.5"/><path d="M12 7.8V12l2.9 1.7"/></svg>
+    </button>
+  </div>
+
+  <!-- ======== 标签页 ======== -->
+  <div class="dbp-tabs">
+    <div class="dbp-tab" data-active="true" role="tab" tabindex="0" title="DeepSeek - 探索未至之境">
+      <span class="dbp-tabTitle">DeepSeek - 探索未至之境</span>
+      <button type="button" class="dbp-tabClose" title="关闭标签页" aria-label="关闭标签页">
+        <svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 6 12 12"/><path d="m18 6-12 12"/></svg>
+      </button>
+    </div>
+    <button type="button" class="dbp-tabAdd" title="新标签页" aria-label="新标签页">
+      <svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+    </button>
+  </div>
+
+  <!-- ======== 内容区：浏览历史 ======== -->
+  <div class="dbp-viewportStack">
+    <div class="dbp-hist">
+      <div class="dbp-hist-inner">
+
+        <div class="dbp-hist-head">
+          <button type="button" class="dbp-hist-back" title="返回" aria-label="返回">
+            <svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5 8 12l7 7"/></svg>
+          </button>
+          <span class="dbp-hist-title">浏览历史</span>
+          <span class="dbp-hist-count">共 216 条</span>
+          <div class="dbp-hist-searchWrap">
+            <span class="dbp-hist-searchIcon">
+              <svg class="ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
+            </span>
+            <input class="dbp-hist-search" type="text" placeholder="搜索标题或网址" spellcheck="false" autocomplete="off" aria-label="搜索历史记录">
+          </div>
+          <button type="button" class="dbp-hist-btn" data-danger="true">清空全部</button>
+        </div>
+
+        <div class="dbp-hist-list">
+
+          <!-- 今天 -->
+          <section class="dbp-hist-groupWrap">
+            <div class="dbp-hist-group"><span>今天</span><span class="dbp-hist-groupCount">6</span></div>
+            <ul class="dbp-hist-rows">
+              <li class="dbp-hist-item">
+                <button type="button" class="dbp-hist-open" title="DeepSeek - 探索未至之境">
+                  <span class="dbp-hist-fav" style="--h:222">D</span>
+                  <span class="dbp-hist-text"><span class="dbp-hist-itemTitle">DeepSeek - 探索未至之境</span><span class="dbp-hist-itemUrl">https://chat.deepseek.com/</span></span>
+                </button>
+                <span class="dbp-hist-time">21:34</span>
+                <button type="button" class="dbp-hist-del" title="删除这条记录" aria-label="删除这条记录">
+                  <svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M9 7V4.5h6V7"/><path d="M6.5 7l.9 12.5h9.2L17.5 7"/><path d="M10 11v5.5"/><path d="M14 11v5.5"/></svg>
+                </button>
+              </li>
+              <li class="dbp-hist-item is-hover">
+                <button type="button" class="dbp-hist-open" title="DeepSeek 开放平台">
+                  <span class="dbp-hist-fav" style="--h:222">D</span>
+                  <span class="dbp-hist-text"><span class="dbp-hist-itemTitle">DeepSeek 开放平台</span><span class="dbp-hist-itemUrl">https://platform.deepseek.com/</span></span>
+                </button>
+                <span class="dbp-hist-time">21:12</span>
+                <button type="button" class="dbp-hist-del" title="删除这条记录" aria-label="删除这条记录">
+                  <svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M9 7V4.5h6V7"/><path d="M6.5 7l.9 12.5h9.2L17.5 7"/><path d="M10 11v5.5"/><path d="M14 11v5.5"/></svg>
+                </button>
+              </li>
+              <li class="dbp-hist-item">
+                <button type="button" class="dbp-hist-open" title="No1064/dsh-web-browser: DSH 浏览器插件">
+                  <span class="dbp-hist-fav" style="--h:215">G</span>
+                  <span class="dbp-hist-text"><span class="dbp-hist-itemTitle">No1064/dsh-web-browser: DSH 浏览器插件</span><span class="dbp-hist-itemUrl">https://github.com/No1064/dsh-web-browser</span></span>
+                </button>
+                <span class="dbp-hist-time">20:47</span>
+                <button type="button" class="dbp-hist-del" title="删除这条记录" aria-label="删除这条记录">
+                  <svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M9 7V4.5h6V7"/><path d="M6.5 7l.9 12.5h9.2L17.5 7"/><path d="M10 11v5.5"/><path d="M14 11v5.5"/></svg>
+                </button>
+              </li>
+              <li class="dbp-hist-item">
+                <button type="button" class="dbp-hist-open" title="GitHub · Where software is built">
+                  <span class="dbp-hist-fav" style="--h:215">G</span>
+                  <span class="dbp-hist-text"><span class="dbp-hist-itemTitle">GitHub · Where software is built</span><span class="dbp-hist-itemUrl">https://github.com/</span></span>
+                </button>
+                <span class="dbp-hist-time">20:41</span>
+                <button type="button" class="dbp-hist-del" title="删除这条记录" aria-label="删除这条记录">
+                  <svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M9 7V4.5h6V7"/><path d="M6.5 7l.9 12.5h9.2L17.5 7"/><path d="M10 11v5.5"/><path d="M14 11v5.5"/></svg>
+                </button>
+              </li>
+              <li class="dbp-hist-item">
+                <button type="button" class="dbp-hist-open" title="MDN Web Docs">
+                  <span class="dbp-hist-fav" style="--h:200">M</span>
+                  <span class="dbp-hist-text"><span class="dbp-hist-itemTitle">MDN Web Docs</span><span class="dbp-hist-itemUrl">https://developer.mozilla.org/zh-CN/</span></span>
+                </button>
+                <span class="dbp-hist-time">19:58</span>
+                <button type="button" class="dbp-hist-del" title="删除这条记录" aria-label="删除这条记录">
+                  <svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M9 7V4.5h6V7"/><path d="M6.5 7l.9 12.5h9.2L17.5 7"/><path d="M10 11v5.5"/><path d="M14 11v5.5"/></svg>
+                </button>
+              </li>
+              <li class="dbp-hist-item">
+                <button type="button" class="dbp-hist-open" title="哔哩哔哩 (゜-゜)つロ 干杯~-bilibili">
+                  <span class="dbp-hist-fav" style="--h:343">B</span>
+                  <span class="dbp-hist-text"><span class="dbp-hist-itemTitle">哔哩哔哩 (゜-゜)つロ 干杯~-bilibili</span><span class="dbp-hist-itemUrl">https://www.bilibili.com/</span></span>
+                </button>
+                <span class="dbp-hist-time">19:22</span>
+                <button type="button" class="dbp-hist-del" title="删除这条记录" aria-label="删除这条记录">
+                  <svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M9 7V4.5h6V7"/><path d="M6.5 7l.9 12.5h9.2L17.5 7"/><path d="M10 11v5.5"/><path d="M14 11v5.5"/></svg>
+                </button>
+              </li>
+            </ul>
+          </section>
+
+          <!-- 昨天 -->
+          <section class="dbp-hist-groupWrap">
+            <div class="dbp-hist-group"><span>昨天</span><span class="dbp-hist-groupCount">5</span></div>
+            <ul class="dbp-hist-rows">
+              <li class="dbp-hist-item">
+                <button type="button" class="dbp-hist-open" title="DeepSeek API Docs - 快速开始">
+                  <span class="dbp-hist-fav" style="--h:222">D</span>
+                  <span class="dbp-hist-text"><span class="dbp-hist-itemTitle">DeepSeek API Docs - 快速开始</span><span class="dbp-hist-itemUrl">https://api-docs.deepseek.com/zh-cn/</span></span>
+                </button>
+                <span class="dbp-hist-time">22:08</span>
+                <button type="button" class="dbp-hist-del" title="删除这条记录" aria-label="删除这条记录">
+                  <svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M9 7V4.5h6V7"/><path d="M6.5 7l.9 12.5h9.2L17.5 7"/><path d="M10 11v5.5"/><path d="M14 11v5.5"/></svg>
+                </button>
+              </li>
+              <li class="dbp-hist-item">
+                <button type="button" class="dbp-hist-open" title="Electron · webview Tag">
+                  <span class="dbp-hist-fav" style="--h:260">E</span>
+                  <span class="dbp-hist-text"><span class="dbp-hist-itemTitle">Electron · webview Tag</span><span class="dbp-hist-itemUrl">https://www.electronjs.org/docs/latest/api/webview-tag</span></span>
+                </button>
+                <span class="dbp-hist-time">21:37</span>
+                <button type="button" class="dbp-hist-del" title="删除这条记录" aria-label="删除这条记录">
+                  <svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M9 7V4.5h6V7"/><path d="M6.5 7l.9 12.5h9.2L17.5 7"/><path d="M10 11v5.5"/><path d="M14 11v5.5"/></svg>
+                </button>
+              </li>
+              <li class="dbp-hist-item">
+                <button type="button" class="dbp-hist-open" title="GitHub 通知">
+                  <span class="dbp-hist-fav" style="--h:215">G</span>
+                  <span class="dbp-hist-text"><span class="dbp-hist-itemTitle">GitHub 通知</span><span class="dbp-hist-itemUrl">https://github.com/notifications</span></span>
+                </button>
+                <span class="dbp-hist-time">20:15</span>
+                <button type="button" class="dbp-hist-del" title="删除这条记录" aria-label="删除这条记录">
+                  <svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M9 7V4.5h6V7"/><path d="M6.5 7l.9 12.5h9.2L17.5 7"/><path d="M10 11v5.5"/><path d="M14 11v5.5"/></svg>
+                </button>
+              </li>
+              <li class="dbp-hist-item">
+                <button type="button" class="dbp-hist-open" title="CSS color-mix() - MDN">
+                  <span class="dbp-hist-fav" style="--h:200">M</span>
+                  <span class="dbp-hist-text"><span class="dbp-hist-itemTitle">CSS color-mix() - MDN</span><span class="dbp-hist-itemUrl">https://developer.mozilla.org/zh-CN/docs/Web/CSS/color_value/color-mix</span></span>
+                </button>
+                <span class="dbp-hist-time">18:52</span>
+                <button type="button" class="dbp-hist-del" title="删除这条记录" aria-label="删除这条记录">
+                  <svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M9 7V4.5h6V7"/><path d="M6.5 7l.9 12.5h9.2L17.5 7"/><path d="M10 11v5.5"/><path d="M14 11v5.5"/></svg>
+                </button>
+              </li>
+              <li class="dbp-hist-item">
+                <button type="button" class="dbp-hist-open" title="维基百科 - Chromium">
+                  <span class="dbp-hist-fav" style="--h:210">W</span>
+                  <span class="dbp-hist-text"><span class="dbp-hist-itemTitle">维基百科 - Chromium</span><span class="dbp-hist-itemUrl">https://zh.wikipedia.org/wiki/Chromium</span></span>
+                </button>
+                <span class="dbp-hist-time">16:20</span>
+                <button type="button" class="dbp-hist-del" title="删除这条记录" aria-label="删除这条记录">
+                  <svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M9 7V4.5h6V7"/><path d="M6.5 7l.9 12.5h9.2L17.5 7"/><path d="M10 11v5.5"/><path d="M14 11v5.5"/></svg>
+                </button>
+              </li>
+            </ul>
+          </section>
+
+          <!-- 更早 -->
+          <section class="dbp-hist-groupWrap">
+            <div class="dbp-hist-group"><span>2026-11-03</span><span class="dbp-hist-groupCount">4</span></div>
+            <ul class="dbp-hist-rows">
+              <li class="dbp-hist-item">
+                <button type="button" class="dbp-hist-open" title="Stack Overflow - Where Developers Learn">
+                  <span class="dbp-hist-fav" style="--h:27">S</span>
+                  <span class="dbp-hist-text"><span class="dbp-hist-itemTitle">Stack Overflow - Where Developers Learn</span><span class="dbp-hist-itemUrl">https://stackoverflow.com/</span></span>
+                </button>
+                <span class="dbp-hist-time">23:04</span>
+                <button type="button" class="dbp-hist-del" title="删除这条记录" aria-label="删除这条记录">
+                  <svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M9 7V4.5h6V7"/><path d="M6.5 7l.9 12.5h9.2L17.5 7"/><path d="M10 11v5.5"/><path d="M14 11v5.5"/></svg>
+                </button>
+              </li>
+              <li class="dbp-hist-item">
+                <button type="button" class="dbp-hist-open" title="GitHub Trending">
+                  <span class="dbp-hist-fav" style="--h:215">G</span>
+                  <span class="dbp-hist-text"><span class="dbp-hist-itemTitle">GitHub Trending</span><span class="dbp-hist-itemUrl">https://github.com/trending</span></span>
+                </button>
+                <span class="dbp-hist-time">21:26</span>
+                <button type="button" class="dbp-hist-del" title="删除这条记录" aria-label="删除这条记录">
+                  <svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M9 7V4.5h6V7"/><path d="M6.5 7l.9 12.5h9.2L17.5 7"/><path d="M10 11v5.5"/><path d="M14 11v5.5"/></svg>
+                </button>
+              </li>
+              <li class="dbp-hist-item">
+                <button type="button" class="dbp-hist-open" title="知乎 - 有问题，就会有答案">
+                  <span class="dbp-hist-fav" style="--h:214">知</span>
+                  <span class="dbp-hist-text"><span class="dbp-hist-itemTitle">知乎 - 有问题，就会有答案</span><span class="dbp-hist-itemUrl">https://www.zhihu.com/</span></span>
+                </button>
+                <span class="dbp-hist-time">19:44</span>
+                <button type="button" class="dbp-hist-del" title="删除这条记录" aria-label="删除这条记录">
+                  <svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M9 7V4.5h6V7"/><path d="M6.5 7l.9 12.5h9.2L17.5 7"/><path d="M10 11v5.5"/><path d="M14 11v5.5"/></svg>
+                </button>
+              </li>
+              <li class="dbp-hist-item">
+                <button type="button" class="dbp-hist-open" title="DeepSeek 文档 - 对话补全">
+                  <span class="dbp-hist-fav" style="--h:222">D</span>
+                  <span class="dbp-hist-text"><span class="dbp-hist-itemTitle">DeepSeek 文档 - 对话补全</span><span class="dbp-hist-itemUrl">https://api-docs.deepseek.com/zh-cn/api/create-chat-completion</span></span>
+                </button>
+                <span class="dbp-hist-time">15:31</span>
+                <button type="button" class="dbp-hist-del" title="删除这条记录" aria-label="删除这条记录">
+                  <svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M9 7V4.5h6V7"/><path d="M6.5 7l.9 12.5h9.2L17.5 7"/><path d="M10 11v5.5"/><path d="M14 11v5.5"/></svg>
+                </button>
+              </li>
+            </ul>
+          </section>
+
+          <button type="button" class="dbp-hist-more">显示更多</button>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== 底栏 ======== -->
+  <div class="dbp-footer">
+    <div class="dbp-footerLeft">
+      <span>v0.2.10</span>
+      <span>·</span>
+      <span>内置 Chromium</span>
+    </div>
+    <div class="dbp-footerCenter" title="https://chat.deepseek.com/">https://chat.deepseek.com/</div>
+    <div class="dbp-footerRight">
+      <span>最后更新 11-05 19:19</span>
+      <button type="button" class="dbp-footerUpdate">更新</button>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>dsh-web-browser · 抖音封面 v2 1080x1440</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1080px;height:1440px;overflow:hidden;background:#05060b}
+  body{font-family:'OPPO Sans 4.0','Hiragino Sans GB','Noto Sans SC',sans-serif;-webkit-font-smoothing:antialiased}
+  #stage{position:relative;width:1080px;height:1440px;overflow:hidden}
+  .bg{position:absolute;inset:0;background:linear-gradient(160deg,#08070f 0%,#100b22 46%,#07060d 100%)}
+  .b1{position:absolute;width:1100px;height:1100px;left:-300px;top:-420px;border-radius:50%;background:radial-gradient(circle,rgba(112,80,255,.5),rgba(112,80,255,.14) 45%,transparent 70%)}
+  .b2{position:absolute;width:900px;height:900px;right:-300px;top:520px;border-radius:50%;background:radial-gradient(circle,rgba(48,118,255,.32),transparent 68%)}
+  .grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);background-size:66px 66px;mask-image:radial-gradient(ellipse at 50% 40%,rgba(0,0,0,.9),transparent 72%);-webkit-mask-image:radial-gradient(ellipse at 50% 40%,rgba(0,0,0,.9),transparent 72%);opacity:.5}
+  .vig{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 36%,transparent 38%,rgba(0,0,0,.62) 100%)}
+  .brand{position:absolute;left:64px;top:54px;display:flex;align-items:center;gap:16px}
+  .brand img{width:52px;height:52px;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+  .brand .n{font-size:25px;font-weight:700;color:#fff;letter-spacing:-.01em}
+  .brand .v{font-size:16px;color:rgba(255,255,255,.45);letter-spacing:.12em}
+  .kicker{position:absolute;left:64px;top:140px;display:flex;align-items:center;gap:13px;font-size:25px;font-weight:600;letter-spacing:.16em;color:rgba(255,255,255,.55)}
+  .kicker::before{content:'';width:36px;height:2px;background:linear-gradient(90deg,#8C6CFF,transparent)}
+  h1{position:absolute;left:64px;top:184px;font-size:94px;font-weight:900;line-height:1.08;letter-spacing:-.02em;color:#fff;text-shadow:0 18px 50px rgba(0,0,0,.5)}
+  h1 em{font-style:normal;color:#BCA6FF;text-shadow:0 0 70px rgba(140,108,255,.55)}
+  .sub{position:absolute;left:68px;top:392px;font-size:32px;font-weight:500;color:rgba(255,255,255,.72);letter-spacing:.03em}
+  .sub b{color:#fff;font-weight:700}
+  .card{position:absolute;border-radius:22px;background:#fff;overflow:hidden;box-shadow:0 34px 90px rgba(0,0,0,.62),0 0 0 1px rgba(255,255,255,.14),0 0 120px rgba(124,92,255,.3)}
+  .main{left:56px;top:470px;width:700px;height:525px;transform:rotate(-2deg)}
+  .main img{position:absolute;left:0px;top:0px;width:760px;height:auto}
+  .inset{left:566px;top:880px;width:440px;height:330px;transform:rotate(2.2deg);box-shadow:0 30px 80px rgba(0,0,0,.7),0 0 0 3px rgba(255,255,255,.9),0 0 0 4px rgba(255,255,255,.25),0 0 120px rgba(124,92,255,.45)}
+  .inset img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 40%}
+  .tag{position:absolute;left:566px;top:840px;padding:10px 20px;border-radius:999px;background:#7C5CFF;color:#fff;font-size:23px;font-weight:600;letter-spacing:.04em;box-shadow:0 10px 30px rgba(124,92,255,.5);transform:rotate(2.2deg)}
+  .chips{position:absolute;left:56px;right:56px;top:1244px;display:flex;justify-content:center;gap:14px}
+  .chip{padding:12px 22px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);font-size:24px;color:rgba(255,255,255,.85);white-space:nowrap}
+  .chip.hot{background:rgba(124,92,255,.9);border-color:rgba(124,92,255,1);color:#fff;font-weight:600;box-shadow:0 10px 28px rgba(124,92,255,.45)}
+  .foot{position:absolute;left:0;right:0;top:1332px;text-align:center;font-size:25px;color:rgba(255,255,255,.5);letter-spacing:.05em}
+  .foot b{color:#BCA6FF;font-weight:600}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="bg"></div><div class="b1"></div><div class="b2"></div><div class="grid"></div><div class="vig"></div>
+  <div class="brand"><img src="assets/icon.png" alt=""><div><div class="n">dsh-web-browser</div><div class="v">v0.2.10 · MIT</div></div></div>
+  <div class="kicker">DSH 插件 · 开源免费</div>
+  <h1>DeepSeek 网页版<br><em>装进 DSH</em></h1>
+  <div class="sub"><b>网页版直接用</b> · 自定义标签页背景</div>
+
+  <div class="card main"><img src="assets/panel-02.jpg" alt=""></div>
+  <div class="tag">自定义标签页背景</div>
+  <div class="card inset"><img src="assets/panel-03.jpg" alt=""></div>
+
+  <div class="chips">
+    <span class="chip hot">DeepSeek 网页版</span>
+    <span class="chip">自定义背景</span>
+    <span class="chip">多标签</span>
+    <span class="chip">右键 · 历史</span>
+  </div>
+  <div class="foot">GitHub 搜 <b>dsh-web-browser</b> · 点个 Star 收更新</div>
+</div>
+</body>
+</html>

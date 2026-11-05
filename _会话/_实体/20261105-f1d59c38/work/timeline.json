@@ -1,0 +1,149 @@
+{
+ "fps": 30,
+ "duration": 30.0,
+ "width": 1080,
+ "height": 1920,
+ "vo": [
+  {
+   "id": "01",
+   "scene": "s1",
+   "text": "网页版 DeepSeek，还切浏览器？",
+   "start": 0.3,
+   "dur": 3.024,
+   "end": 3.324
+  },
+  {
+   "id": "02",
+   "scene": "s2",
+   "text": "装个插件，直接开在 DSH 里。",
+   "start": 3.608,
+   "dur": 2.952,
+   "end": 6.56
+  },
+  {
+   "id": "03",
+   "scene": "s3",
+   "text": "登录就能用，不切窗口。",
+   "start": 6.94,
+   "dur": 2.688,
+   "end": 9.628
+  },
+  {
+   "id": "04",
+   "scene": "s4",
+   "text": "DeepSeek 常驻，重启也还在。",
+   "start": 9.912,
+   "dur": 2.904,
+   "end": 12.816
+  },
+  {
+   "id": "05",
+   "scene": "s5",
+   "text": "标签页背景，也能自己换。",
+   "start": 13.58,
+   "dur": 2.928,
+   "end": 16.508
+  },
+  {
+   "id": "06",
+   "scene": "s6",
+   "text": "渐变、纯色、图片都行。",
+   "start": 16.768,
+   "dur": 3.12,
+   "end": 19.888
+  },
+  {
+   "id": "07",
+   "scene": "s7",
+   "text": "右键、历史、Chrome 都在。",
+   "start": 20.028,
+   "dur": 2.904,
+   "end": 22.932
+  },
+  {
+   "id": "08",
+   "scene": "s8",
+   "text": "开源免费，GitHub 搜 dsh-web-browser，点个 Star。",
+   "start": 23.696,
+   "dur": 4.56,
+   "end": 28.256
+  }
+ ],
+ "scenes": [
+  {
+   "id": "s1",
+   "name": "hook",
+   "start": 0.0,
+   "end": 3.358,
+   "dur": 3.358,
+   "vo": "01"
+  },
+  {
+   "id": "s2",
+   "name": "reveal",
+   "start": 3.358,
+   "end": 6.69,
+   "dur": 3.332,
+   "vo": "02"
+  },
+  {
+   "id": "s3",
+   "name": "tabs",
+   "start": 6.69,
+   "end": 9.662,
+   "dur": 2.972,
+   "vo": "03"
+  },
+  {
+   "id": "s4",
+   "name": "address",
+   "start": 9.662,
+   "end": 13.33,
+   "dur": 3.668,
+   "vo": "04"
+  },
+  {
+   "id": "s5",
+   "name": "home",
+   "start": 13.33,
+   "end": 16.518,
+   "dur": 3.188,
+   "vo": "05"
+  },
+  {
+   "id": "s6",
+   "name": "menu",
+   "start": 16.518,
+   "end": 19.778,
+   "dur": 3.26,
+   "vo": "06"
+  },
+  {
+   "id": "s7",
+   "name": "history",
+   "start": 19.778,
+   "end": 23.446,
+   "dur": 3.668,
+   "vo": "07"
+  },
+  {
+   "id": "s8",
+   "name": "cta",
+   "start": 23.446,
+   "end": 30.0,
+   "dur": 6.554,
+   "vo": "08"
+  }
+ ],
+ "hard_cuts": [
+  0.0,
+  3.358,
+  6.69,
+  9.662,
+  13.33,
+  16.518,
+  19.778,
+  23.446
+ ],
+ "notes": "scene_start = vo_start - 0.25s transition lead-in; VO gap 0.14s"
+}

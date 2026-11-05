@@ -1,0 +1,52 @@
+【标题（3 选 1）】
+
+A. 切窗口太烦？DeepSeek 直接开在 DSH 里
+B. DeepSeek 网页版，塞进 DSH 面板里
+C. DSH 标签页背景，我换成了自己的图
+
+【正文】
+
+网页版 DeepSeek 还得切浏览器？装上 dsh-web-browser，左侧点「浏览器」，chat.deepseek.com 就开在 DSH 面板里，登录完直接聊，不用来回切窗口。标签常驻，重启还在。还能给标签页换背景，渐变、纯色、图片都行 😅 右键、历史也都有。
+
+【话题标签】
+
+#DeepSeek #DeepSeek网页版 #DSH #DeepSeekHarness #开源 #开源项目 #GitHub #AI工具 #浏览器插件 #程序员 #效率工具
+
+【封面（1080×1440，已出图 out/cover-3x4.png）】
+
+封面主文案：
+主标题：DeepSeek 网页版
+副标题：装进 DSH · 自定义标签页背景
+
+备选封面文案（二次投放/切片用）：
+A. 主标题：开在DSH里 / 副标题：DeepSeek不用切浏览器
+B. 主标题：标签页换背景 / 副标题：渐变 纯色 图片都行
+
+【置顶评论】
+
+在 DSH Desktop 里执行：
+dsh plugin --profile desktop add github:No1064/dsh-web-browser
+
+装完重启 DSH，左上角菜单点「浏览器」，地址栏输 chat.deepseek.com 回车，就能在 DSH 里用网页版 DeepSeek 了；标签页背景在起始页的「管理」里换。
+源码和更新：https://github.com/No1064/dsh-web-browser
+用得上的话顺手点个 Star，以后找更新方便。
+
+【发布建议】
+
+- 时间：工作日 21:00–22:30 首发；备选 12:10–13:00；周末 10:00–11:30；避开 18:00–19:00 通勤
+- 封面：用「DeepSeek 聊天页在 DSH 面板里 + 左侧菜单高亮」那一帧（约 9–12s）；次选换背景段（约 14–19s，需裁紧）；封面图以 out/cover-3x4.png 为准
+- 配乐：用原声发布（已有云希配音 + 原创 BGM），不要再叠热门 BGM；要加也只加无人声 lo-fi，音量压到 -20dB 以下
+- 评论区：置顶安装命令 + 仓库地址 + 网页版用法；不刷三连，用「点 Star 收更新」的价值说法；兼容性问题引到 GitHub issue
+- 不选片尾 CTA 帧做封面（安装命令和 GitHub 字样会和封面字打架）
+
+【事实自查（摘要）】
+
+- 左侧「浏览器」入口、整页面板占主内容区：README.md:32、:40
+- 地址栏输入 URL 直接打开（chat.deepseek.com）、输文字搜索：README.md:42
+- 标签常驻 / 重启恢复：README.md:41、:48
+- 标签页（起始页）背景四种可选项：README.md:44
+- 右键菜单、浏览历史、用 Chrome 打开：README.md:43、:45、:46
+- 仅 DSH Desktop、依赖桌面端 webview 桥：README.md:81–83
+- MIT 开源、v0.2.10、作者 No1064、安装命令：README.md:15、:14、:12、:66–70
+- 没写：star 数、下载量、用户评价、性能数据、Windows/macOS 兼容性、绝对化表述、网页版额度（不限次数/免费额度）、AI 自动浏览
+- 「登录就能用」属网页版自身行为，不写成插件新增能力

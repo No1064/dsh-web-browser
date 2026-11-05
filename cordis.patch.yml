@@ -1,0 +1,4 @@
+# Bundle patch layer: insert the Host row; the Client half loads from `dsh.client`.
+- insert:
+    - id: dsh-web-browser
+      name: 'dsh-web-browser'
