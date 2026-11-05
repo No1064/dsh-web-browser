@@ -1,0 +1,55 @@
+{
+  "name": "dsh-web-browser",
+  "version": "0.2.10",
+  "description": "在 DSH 左侧功能菜单新增「浏览器」整页面板：内置 Chromium 引擎，支持多标签、主页/常用网址/钉住、右键菜单、浏览历史。",
+  "icon": "./icon.svg",
+  "type": "module",
+  "license": "MIT",
+  "author": "No1064",
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "browser",
+    "webview",
+    "tabs"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/No1064/dsh-web-browser.git"
+  },
+  "homepage": "https://github.com/No1064/dsh-web-browser#readme",
+  "bugs": {
+    "url": "https://github.com/No1064/dsh-web-browser/issues"
+  },
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "icon.svg"
+  ],
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-layout",
+        "@deepseek-ai/dsh-client-locale"
+      ]
+    }
+  }
+}
