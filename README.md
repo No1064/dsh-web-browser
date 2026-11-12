@@ -25,10 +25,9 @@
     <a href="#安装">安装</a> &nbsp;|&nbsp;
     <a href="#使用">使用</a>
   </p>
-  <p align="center">
-    <img src="screenshots/03-start-custom.jpg" alt="dsh-web-browser 自定义起始页" width="800" />
-  </p>
 </div>
+
+![自定义起始页](screenshots/03-start-custom.jpg)
 
 在 DeepSeek Harness Desktop 左上角功能菜单新增「浏览器」入口，点击后在右侧主内容区整页浏览网页与外部链接。与 DSH 自带的右侧栏单页浏览器不同，本插件占据主内容区整页，并把多标签、主页快捷入口、收藏钉住、独立历史页和右键菜单做完整。
 
@@ -57,10 +56,6 @@
 **浏览页**
 
 ![浏览页](screenshots/02-browse.jpg)
-
-**自定义起始页**
-
-![自定义起始页](screenshots/03-start-custom.jpg)
 
 ## 安装
 

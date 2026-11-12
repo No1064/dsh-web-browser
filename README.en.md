@@ -25,10 +25,9 @@
     <a href="#installation">Installation</a> &nbsp;|&nbsp;
     <a href="#usage">Usage</a>
   </p>
-  <p align="center">
-    <img src="screenshots/03-start-custom.jpg" alt="dsh-web-browser custom start page" width="800" />
-  </p>
 </div>
+
+![Custom start page](screenshots/03-start-custom.jpg)
 
 Adds a **Browser** entry to the DeepSeek Harness Desktop feature menu. Clicking it opens a full-page browsing panel in the main content area for websites and external links. Unlike the built-in single-page browser in DSH's right sidebar, this plugin occupies the whole main content area and implements tabs, pinned homepage shortcuts, a dedicated history page and a context menu.
 
@@ -57,10 +56,6 @@ Adds a **Browser** entry to the DeepSeek Harness Desktop feature menu. Clicking 
 **Browsing**
 
 ![Browsing](screenshots/02-browse.jpg)
-
-**Custom start page**
-
-![Custom start page](screenshots/03-start-custom.jpg)
 
 ## Installation
 
